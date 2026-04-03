@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { useWorkflow } from '../context/WorkflowContext';
 import { Sparkles, Copy, CheckCircle2 } from 'lucide-react';
 
@@ -110,7 +110,7 @@ export function DraftGenerator() {
       const text = data.choices[0]?.message?.content || '';
 
       // Split by "---" separator
-      const parts = text.split(/---/).map(part => part.trim());
+      const parts = text.split(/---/).map((part: string) => part.trim());
 
       // Ensure we have exactly 3 parts, if not, handle gracefully
       const xiaohongshu = parts.length > 0 ? parts[0] : '生成失败';
