@@ -152,8 +152,8 @@ export function IdeaInbox() {
             type="submit"
             disabled={!inputText.trim()}
             style={{
-              backgroundColor: inputText.trim() ? 'var(--text-primary)' : 'var(--border-color)',
-              color: 'var(--bg-base)',
+              backgroundColor: inputText.trim() ? 'var(--accent-primary)' : 'var(--border-color)',
+              color: '#000000',
               padding: '0.5rem',
               borderRadius: '50%',
               display: 'flex',
@@ -192,8 +192,8 @@ export function IdeaInbox() {
                   alignItems: 'center',
                   gap: '0.5rem',
                   backgroundColor: 'transparent',
-                  border: '1px solid var(--text-primary)',
-                  color: 'var(--text-primary)',
+                  border: '1px solid var(--accent-primary)',
+                  color: 'var(--accent-primary)',
                   padding: '0.5rem 1rem',
                   borderRadius: 'var(--radius-sm)',
                   fontSize: '0.875rem',
@@ -201,12 +201,12 @@ export function IdeaInbox() {
                   transition: 'var(--transition)'
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = 'var(--text-primary)';
-                  e.currentTarget.style.color = 'var(--bg-base)';
+                  e.currentTarget.style.backgroundColor = 'var(--accent-primary)';
+                  e.currentTarget.style.color = '#000000';
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.backgroundColor = 'transparent';
-                  e.currentTarget.style.color = 'var(--text-primary)';
+                  e.currentTarget.style.color = 'var(--accent-primary)';
                 }}
               >
                 深化

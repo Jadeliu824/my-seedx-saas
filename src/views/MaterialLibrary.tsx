@@ -26,18 +26,11 @@ export function MaterialLibrary() {
           <p className="text-muted" style={{ marginTop: '0.5rem' }}>从碰运气到系统化，你的创作地基。</p>
         </div>
         <button
-          className="glass-panel"
+          className="btn-primary"
           style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
             padding: '0.75rem 1.25rem',
-            color: 'var(--accent-primary)',
-            fontWeight: 600,
-            transition: 'var(--transition)'
+            fontSize: '0.875rem'
           }}
-          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--bg-surface-hover)'}
-          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--bg-surface)'}
         >
           <Plus size={18} />
           添加素材
@@ -59,10 +52,10 @@ export function MaterialLibrary() {
                 gap: '0.5rem',
                 padding: '0.5rem 1rem',
                 borderRadius: 'var(--radius-lg)',
-                backgroundColor: isActive ? 'var(--bg-surface)' : 'transparent',
-                border: isActive ? '1px solid var(--border-color)' : '1px solid transparent',
-                color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)',
-                fontWeight: isActive ? 500 : 400,
+                backgroundColor: isActive ? 'var(--bg-surface-hover)' : 'transparent',
+                border: isActive ? '1px solid var(--accent-primary)' : '1px solid transparent',
+                color: isActive ? 'var(--accent-primary)' : 'var(--text-secondary)',
+                fontWeight: isActive ? 600 : 400,
                 transition: 'var(--transition)'
               }}
             >

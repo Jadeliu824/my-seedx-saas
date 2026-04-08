@@ -165,7 +165,7 @@ export function DraftGenerator() {
                   backgroundColor: selectedDraftId === draft.id ? 'var(--bg-surface-hover)' : 'transparent',
                   cursor: 'pointer',
                   border: '1px solid',
-                  borderColor: selectedDraftId === draft.id ? 'var(--text-primary)' : 'var(--border-color)',
+                  borderColor: selectedDraftId === draft.id ? 'var(--accent-primary)' : 'var(--border-color)',
                   marginBottom: '0.5rem',
                   transition: 'var(--transition)'
                 }}

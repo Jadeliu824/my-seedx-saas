@@ -32,7 +32,7 @@ export function AnalyticsView() {
                   <Icon size={20} color="var(--text-primary)" />
                 </div>
               </div>
-              <div style={{ fontSize: '2.5rem', fontWeight: 700 }}>{stat.value}</div>
+              <div style={{ fontSize: '2.5rem', fontWeight: 700, color: 'var(--accent-primary)' }}>{stat.value}</div>
             </div>
           )
         })}
