@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Sidebar } from './components/Sidebar';
 import { IdeaInbox } from './views/IdeaInbox';
 import { DraftGenerator } from './views/DraftGenerator';
@@ -9,12 +9,31 @@ export type ViewState = 'inbox' | 'drafts' | 'materials' | 'analytics';
 
 function App() {
   const [currentView, setCurrentView] = useState<ViewState>('inbox');
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   return (
-    <div style={{ display: 'flex', height: '100vh', width: '100vw', overflow: 'hidden' }}>
-      <Sidebar currentView={currentView} onViewChange={setCurrentView} />
+    <div style={{ 
+      display: 'flex', 
+      flexDirection: isMobile ? 'column' : 'row',
+      height: '100vh', 
+      width: '100vw', 
+      overflow: 'hidden',
+      backgroundColor: 'var(--bg-base)'
+    }}>
+      <Sidebar currentView={currentView} onViewChange={setCurrentView} isMobile={isMobile} />
       
-      <main style={{ flex: 1, padding: '2rem', overflowY: 'auto' }}>
+      <main style={{ 
+        flex: 1, 
+        padding: isMobile ? '1rem' : '2rem', 
+        overflowY: 'auto',
+        paddingBottom: isMobile ? 'calc(var(--nav-height) + 1rem)' : '2rem'
+      }}>
         <div style={{ maxWidth: '1000px', margin: '0 auto', height: '100%' }}>
           {currentView === 'inbox' && <IdeaInbox />}
           {currentView === 'drafts' && <DraftGenerator />}

@@ -10,7 +10,7 @@ declare global {
   }
 }
 
-export function IdeaInbox() {
+export function IdeaInbox({ isMobile }: { isMobile?: boolean }) {
   const { ideas, addIdea, updateIdeaStatus, addDraft } = useWorkflow();
   const [inputText, setInputText] = useState('');
   const [isRecording, setIsRecording] = useState(false);
@@ -102,9 +102,9 @@ export function IdeaInbox() {
 
   return (
     <div style={{ padding: '1rem 0' }}>
-      <header style={{ marginBottom: '2.5rem' }}>
-        <h2 style={{ fontSize: '1.875rem', fontWeight: 700 }}>选题记录</h2>
-        <p className="text-muted" style={{ marginTop: '0.5rem' }}>你的想法收集箱，所有碎片想法都先扔进来。</p>
+      <header style={{ marginBottom: isMobile ? '1.5rem' : '2.5rem' }}>
+        <h2 style={{ fontSize: isMobile ? '1.5rem' : '1.875rem', fontWeight: 700 }}>选题记录</h2>
+        <p className="text-muted" style={{ marginTop: '0.5rem', fontSize: isMobile ? '0.875rem' : '1rem' }}>你的想法收集箱，所有碎片想法都先扔进来。</p>
       </header>
 
       <form onSubmit={handleSubmit} style={{ position: 'relative', marginBottom: '3rem' }}>
@@ -178,7 +178,14 @@ export function IdeaInbox() {
           </div>
         ) : (
           inboxIdeas.map(idea => (
-            <div key={idea.id} className="glass-panel" style={{ padding: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <div key={idea.id} className="glass-panel" style={{ 
+              padding: '1.5rem', 
+              display: 'flex', 
+              flexDirection: isMobile ? 'column' : 'row',
+              justifyContent: 'space-between', 
+              alignItems: isMobile ? 'stretch' : 'flex-start',
+              gap: '1rem'
+            }}>
               <div>
                 <p style={{ whiteSpace: 'pre-wrap', marginBottom: '1rem', fontWeight: 500 }}>{idea.content}</p>
                 <span className="text-muted" style={{ fontSize: '0.75rem' }}>

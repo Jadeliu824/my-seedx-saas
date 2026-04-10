@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useWorkflow } from '../context/WorkflowContext';
 import { Sparkles, Copy, CheckCircle2 } from 'lucide-react';
 
-export function DraftGenerator() {
+export function DraftGenerator({ isMobile }: { isMobile?: boolean }) {
   const { drafts, ideas, updatePlatformDraft } = useWorkflow();
   const [selectedDraftId, setSelectedDraftId] = useState<string | null>(null);
   
@@ -143,9 +143,18 @@ export function DraftGenerator() {
   };
 
   return (
-    <div style={{ display: 'flex', gap: '2rem', height: '100%' }}>
+    <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? '1rem' : '2rem', height: '100%' }}>
       {/* Left Sidebar: List of Drafts */}
-      <div style={{ width: '300px', display: 'flex', flexDirection: 'column', gap: '1rem', borderRight: '1px solid var(--border-color)', paddingRight: '1rem' }}>
+      <div style={{ 
+        width: isMobile ? '100%' : '300px', 
+        display: 'flex', 
+        flexDirection: 'column', 
+        gap: '1rem', 
+        borderRight: isMobile ? 'none' : '1px solid var(--border-color)', 
+        borderBottom: isMobile ? '1px solid var(--border-color)' : 'none',
+        paddingRight: isMobile ? '0' : '1rem',
+        paddingBottom: isMobile ? '1rem' : '0'
+      }}>
         <div style={{ paddingBottom: '1rem', borderBottom: '1px solid var(--border-color)' }}>
           <h2 style={{ fontSize: '1.25rem', fontWeight: 600 }}>待深化选题</h2>
           <p className="text-muted" style={{ fontSize: '0.875rem' }}>共有 {drafts.length} 个草稿</p>
@@ -183,7 +192,7 @@ export function DraftGenerator() {
       </div>
 
       {/* Right Content Area: Deepen Workflow */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto', paddingLeft: '1rem' }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflowY: isMobile ? 'visible' : 'auto', paddingLeft: isMobile ? '0' : '1rem' }}>
         {currentDraft ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
             

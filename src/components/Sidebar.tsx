@@ -1,21 +1,102 @@
-import { Lightbulb, Edit3, Layers, BarChart3, LogOut } from 'lucide-react';
+import { Lightbulb, Edit3, Layers, BarChart3, LogOut, User } from 'lucide-react';
 import type { ViewState } from '../App';
 import { useAuth } from '../context/AuthContext';
 
 interface SidebarProps {
   currentView: ViewState;
   onViewChange: (view: ViewState) => void;
+  isMobile?: boolean;
 }
 
-export function Sidebar({ currentView, onViewChange }: SidebarProps) {
+export function Sidebar({ currentView, onViewChange, isMobile }: SidebarProps) {
   const { user, loginWithGoogle, logout } = useAuth();
 
   const navItems: { id: ViewState; label: string; icon: React.FC<any> }[] = [
-    { id: 'inbox', label: '选题记录', icon: Lightbulb },
-    { id: 'drafts', label: '待深化选题', icon: Edit3 },
-    { id: 'materials', label: '内容素材库', icon: Layers },
-    { id: 'analytics', label: '数据复盘', icon: BarChart3 },
+    { id: 'inbox', label: '记录', icon: Lightbulb },
+    { id: 'drafts', label: '深化', icon: Edit3 },
+    { id: 'materials', label: '素材', icon: Layers },
+    { id: 'analytics', label: '复盘', icon: BarChart3 },
   ];
+
+  if (isMobile) {
+    return (
+      <nav style={{
+        position: 'fixed',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        height: 'var(--nav-height)',
+        backgroundColor: 'var(--bg-surface)',
+        borderTop: '1px solid var(--border-color)',
+        display: 'flex',
+        justifyContent: 'space-around',
+        alignItems: 'center',
+        padding: '0 0.5rem',
+        zIndex: 1000
+      }}>
+        {navItems.map(item => {
+          const Icon = item.icon;
+          const isActive = currentView === item.id;
+          return (
+            <button
+              key={item.id}
+              onClick={() => onViewChange(item.id)}
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '0.25rem',
+                flex: 1,
+                padding: '0.5rem 0',
+                color: isActive ? 'var(--accent-primary)' : 'var(--text-secondary)',
+                transition: 'var(--transition)'
+              }}
+            >
+              <Icon size={20} />
+              <span style={{ fontSize: '0.625rem', fontWeight: isActive ? 600 : 400 }}>{item.label}</span>
+            </button>
+          );
+        })}
+        {user ? (
+          <button 
+            onClick={logout}
+            style={{ 
+              display: 'flex', 
+              flexDirection: 'column', 
+              alignItems: 'center', 
+              gap: '0.25rem', 
+              flex: 1,
+              color: 'var(--text-secondary)'
+            }}
+          >
+            <img 
+              src={user.photoURL || ''} 
+              alt="me" 
+              style={{ width: 20, height: 20, borderRadius: '50%' }} 
+              onError={(e) => { (e.target as any).style.display = 'none' }}
+            />
+            {!user.photoURL && <User size={20} />}
+            <span style={{ fontSize: '0.625rem' }}>退出</span>
+          </button>
+        ) : (
+          <button 
+            onClick={loginWithGoogle}
+            style={{ 
+              display: 'flex', 
+              flexDirection: 'column', 
+              alignItems: 'center', 
+              gap: '0.25rem', 
+              flex: 1,
+              color: 'var(--accent-primary)'
+            }}
+          >
+            <User size={20} />
+            <span style={{ fontSize: '0.625rem' }}>登录</span>
+          </button>
+        )}
+      </nav>
+    );
+  }
 
   return (
     <aside style={{
@@ -71,6 +152,7 @@ export function Sidebar({ currentView, onViewChange }: SidebarProps) {
         {navItems.map(item => {
           const Icon = item.icon;
           const isActive = currentView === item.id;
+          const fullLabel = item.id === 'inbox' ? '选题记录' : item.id === 'drafts' ? '待深化选题' : item.id === 'materials' ? '内容素材库' : '数据复盘';
           return (
             <button
               key={item.id}
@@ -95,7 +177,7 @@ export function Sidebar({ currentView, onViewChange }: SidebarProps) {
               }}
             >
               <Icon size={18} color={isActive ? 'var(--accent-primary)' : 'currentColor'} />
-              {item.label}
+              {fullLabel}
             </button>
           );
         })}
@@ -162,12 +244,7 @@ export function Sidebar({ currentView, onViewChange }: SidebarProps) {
             onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'var(--accent-secondary)'; }}
             onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'var(--accent-primary)'; }}
           >
-            <svg width="16" height="16" viewBox="0 0 24 24">
-              <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#000"/>
-              <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#000"/>
-              <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#000"/>
-              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#000"/>
-            </svg>
+            <User size={16} />
             使用 Google 登录
           </button>
         )}

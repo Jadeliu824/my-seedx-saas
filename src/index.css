@@ -17,6 +17,14 @@
   --radius-lg: 8px;
   
   --transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  --header-height: 0px;
+  --nav-height: 0px;
+}
+
+@media (max-width: 768px) {
+  :root {
+    --nav-height: 64px;
+  }
 }
 
 * {
@@ -127,4 +135,23 @@ h1, h2, h3, h4 {
 }
 .btn-outline:hover {
   background-color: var(--bg-surface-hover);
+}
+
+/* Responsive Utilities */
+@media (max-width: 768px) {
+  .hide-on-mobile {
+    display: none !important;
+  }
+  
+  .show-on-mobile {
+    display: block !important;
+  }
+  
+  .stack-on-mobile {
+    flex-direction: column !important;
+  }
+}
+
+.show-on-mobile {
+  display: none;
 }

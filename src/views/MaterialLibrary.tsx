@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useWorkflow } from '../context/WorkflowContext';
 import { BookOpen, Quote, Target, Lightbulb, Plus } from 'lucide-react';
 
-export function MaterialLibrary() {
+export function MaterialLibrary({ isMobile }: { isMobile?: boolean }) {
   const { materials } = useWorkflow();
   const [activeTab, setActiveTab] = useState('all');
 
@@ -29,7 +29,8 @@ export function MaterialLibrary() {
           className="btn-primary"
           style={{
             padding: '0.75rem 1.25rem',
-            fontSize: '0.875rem'
+            fontSize: '0.875rem',
+            width: isMobile ? '100%' : 'auto'
           }}
         >
           <Plus size={18} />
@@ -38,7 +39,7 @@ export function MaterialLibrary() {
       </header>
 
       {/* Navigation Tabs */}
-      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '2rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem' }}>
+      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '2rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem', overflowX: 'auto' }}>
         {tabs.map(tab => {
           const isActive = activeTab === tab.id;
           const Icon = tab.icon;
@@ -56,7 +57,8 @@ export function MaterialLibrary() {
                 border: isActive ? '1px solid var(--accent-primary)' : '1px solid transparent',
                 color: isActive ? 'var(--accent-primary)' : 'var(--text-secondary)',
                 fontWeight: isActive ? 600 : 400,
-                transition: 'var(--transition)'
+                transition: 'var(--transition)',
+                whiteSpace: 'nowrap'
               }}
             >
               {Icon && <Icon size={16} />}
@@ -67,7 +69,7 @@ export function MaterialLibrary() {
       </div>
 
       {/* Grid of Materials */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem', overflowY: 'auto', paddingBottom: '2rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem', overflowY: 'auto', paddingBottom: '2rem' }}>
         {filteredMaterials.map(mat => (
           <div key={mat.id} className="glass-panel" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

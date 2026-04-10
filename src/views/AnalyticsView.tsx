@@ -1,7 +1,7 @@
 import { useWorkflow } from '../context/WorkflowContext';
 import { TrendingUp, FileText, CheckCircle2 } from 'lucide-react';
 
-export function AnalyticsView() {
+export function AnalyticsView({ isMobile }: { isMobile?: boolean }) {
   const { ideas } = useWorkflow();
 
   const publishedIdeas = ideas.filter(i => i.status === 'published');
@@ -21,7 +21,7 @@ export function AnalyticsView() {
         <p className="text-muted" style={{ marginTop: '0.5rem' }}>内容是流量入口，业务是变现出口。凭数据迭代，不凭感觉。</p>
       </header>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem', marginBottom: '3rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: '1.5rem', marginBottom: '3rem' }}>
         {stats.map((stat, i) => {
           const Icon = stat.icon;
           return (
