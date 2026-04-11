@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useWorkflow } from '../context/WorkflowContext';
 import { BookOpen, Quote, Target, Lightbulb, Plus } from 'lucide-react';
-import { MaterialType } from '../types';
+import type { MaterialType } from '../types';
 
 export function MaterialLibrary({ isMobile }: { isMobile?: boolean }) {
   const { materials, addMaterial } = useWorkflow();
@@ -46,11 +46,14 @@ export function MaterialLibrary({ isMobile }: { isMobile?: boolean }) {
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', position: 'relative' }}>
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: isMobile ? 'flex-start' : 'center', marginBottom: '2rem', flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? '1rem' : '0' }}>
         <div>
-          <h2 style={{ fontSize: '1.875rem', fontWeight: 700 }}>内容素材库</h2>
+          <h2 style={{ fontSize: '1.875rem', fontWeight: 700 }}>内容素材库 (v2.0)</h2>
           <p className="text-muted" style={{ marginTop: '0.5rem' }}>从碰运气到系统化，你的创作地基。</p>
         </div>
         <button
-          onClick={() => setIsModalOpen(true)}
+          onClick={() => {
+            console.log('Add Material button clicked');
+            setIsModalOpen(true);
+          }}
           className="btn-primary"
           style={{
             padding: '0.75rem 1.25rem',
@@ -76,7 +79,7 @@ export function MaterialLibrary({ isMobile }: { isMobile?: boolean }) {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          zIndex: 1000,
+          zIndex: 9999,
           padding: '1rem'
         }}>
           <div className="glass-panel" style={{ width: '100%', maxWidth: '500px', padding: '2rem', position: 'relative' }}>

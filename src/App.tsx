@@ -37,7 +37,7 @@ function App() {
         <div style={{ maxWidth: '1000px', margin: '0 auto', height: '100%' }}>
           {currentView === 'inbox' && <IdeaInbox />}
           {currentView === 'drafts' && <DraftGenerator />}
-          {currentView === 'materials' && <MaterialLibrary />}
+          {currentView === 'materials' && <MaterialLibrary isMobile={isMobile} />}
           {currentView === 'analytics' && <AnalyticsView />}
         </div>
       </main>
