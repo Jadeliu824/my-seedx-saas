@@ -29,7 +29,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const loginWithGoogle = async () => {
-    await signInWithPopup(auth, googleProvider);
+    try {
+      await signInWithPopup(auth, googleProvider);
+    } catch (error: any) {
+      console.error('Login error:', error);
+      if (error.code === 'auth/unauthorized-domain') {
+        alert('登录失败：当前域名未在 Firebase 中授权。请在 Firebase 控制台添加该域名。');
+      } else if (error.code === 'auth/popup-blocked') {
+        alert('登录失败：弹窗被浏览器拦截，请允许弹窗后重试。');
+      } else {
+        alert(`登录出错: ${error.message}`);
+      }
+    }
   };
 
   const logout = async () => {
