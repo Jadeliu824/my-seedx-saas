@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { useWorkflow } from '../context/WorkflowContext';
-import { BookOpen, Quote, Target, Lightbulb, Plus, Trash2 } from 'lucide-react';
+import { BookOpen, Quote, Target, Lightbulb, Plus, Trash2, X, Check } from 'lucide-react';
 import type { MaterialType } from '../types';
 
 export function MaterialLibrary({ isMobile }: { isMobile?: boolean }) {
   const { materials, addMaterial, deleteMaterial } = useWorkflow();
   const [activeTab, setActiveTab] = useState('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [deletingMatId, setDeletingMatId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     title: '',
     type: 'core_concept' as MaterialType,
@@ -190,38 +191,76 @@ export function MaterialLibrary({ isMobile }: { isMobile?: boolean }) {
             
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <h3 style={{ fontSize: '1.125rem', fontWeight: 600 }}>{mat.title}</h3>
-              <button
-                onClick={() => {
-                  if (window.confirm('确定要删除这条素材吗？')) {
-                    deleteMaterial(mat.id);
-                  }
-                }}
-                style={{
-                  padding: '0.4rem',
-                  borderRadius: 'var(--radius-sm)',
-                  transition: 'var(--transition)',
-                  cursor: 'pointer',
-                  backgroundColor: 'transparent',
-                  border: '1px solid transparent',
-                  color: 'var(--text-secondary)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.color = '#ef4444';
-                  e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
-                  e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.2)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.color = 'var(--text-secondary)';
-                  e.currentTarget.style.backgroundColor = 'transparent';
-                  e.currentTarget.style.borderColor = 'transparent';
-                }}
-                title="删除素材"
-              >
-                <Trash2 size={18} />
-              </button>
+              {deletingMatId === mat.id ? (
+                <div style={{ display: 'flex', gap: '0.25rem' }}>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      deleteMaterial(mat.id);
+                      setDeletingMatId(null);
+                    }}
+                    style={{
+                      padding: '0.4rem',
+                      borderRadius: 'var(--radius-sm)',
+                      backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                      color: '#22c55e',
+                      border: 'none',
+                      cursor: 'pointer'
+                    }}
+                    title="确认删除"
+                  >
+                    <Check size={16} />
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setDeletingMatId(null);
+                    }}
+                    style={{
+                      padding: '0.4rem',
+                      borderRadius: 'var(--radius-sm)',
+                      backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                      color: '#ef4444',
+                      border: 'none',
+                      cursor: 'pointer'
+                    }}
+                    title="取消"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setDeletingMatId(mat.id);
+                  }}
+                  style={{
+                    padding: '0.4rem',
+                    borderRadius: 'var(--radius-sm)',
+                    transition: 'var(--transition)',
+                    cursor: 'pointer',
+                    backgroundColor: 'transparent',
+                    border: '1px solid transparent',
+                    color: 'var(--text-secondary)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.color = '#ef4444';
+                    e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.color = 'var(--text-secondary)';
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                  }}
+                  title="删除素材"
+                >
+                  <Trash2 size={16} />
+                </button>
+              )}
             </div>
             
             <p className="text-muted" style={{ fontSize: '0.875rem', lineHeight: 1.6, flex: 1 }}>

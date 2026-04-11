@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useWorkflow } from '../context/WorkflowContext';
-import { Sparkles, Copy, CheckCircle2, Trash2 } from 'lucide-react';
+import { Sparkles, Copy, CheckCircle2, Trash2, X, Check } from 'lucide-react';
 
 export function DraftGenerator({ isMobile }: { isMobile?: boolean }) {
   const { drafts, ideas, updatePlatformDraft, deleteDraft } = useWorkflow();
@@ -15,6 +15,7 @@ export function DraftGenerator({ isMobile }: { isMobile?: boolean }) {
   } | null>(null);
   
   const [copiedSection, setCopiedSection] = useState<string | null>(null);
+  const [deletingDraftId, setDeletingDraftId] = useState<string | null>(null);
 
   const currentDraft = drafts.find(d => d.id === selectedDraftId);
   const currentIdea = currentDraft ? ideas.find(i => i.id === currentDraft.ideaId) : null;
@@ -245,41 +246,79 @@ export function DraftGenerator({ isMobile }: { isMobile?: boolean }) {
                     {new Date(draft.createdAt).toLocaleDateString()}
                   </p>
                 </div>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (window.confirm('确定要删除这个草稿吗？')) {
-                      deleteDraft(draft.id);
-                      if (selectedDraftId === draft.id) {
-                        setSelectedDraftId(null);
-                      }
-                    }
-                  }}
-                  style={{
-                    padding: '0.4rem',
-                    borderRadius: 'var(--radius-sm)',
-                    transition: 'var(--transition)',
-                    cursor: 'pointer',
-                    backgroundColor: 'transparent',
-                    border: '1px solid transparent',
-                    color: 'var(--text-secondary)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.color = '#ef4444';
-                    e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.color = 'var(--text-secondary)';
-                    e.currentTarget.style.backgroundColor = 'transparent';
-                  }}
-                  title="删除草稿"
-                >
-                  <Trash2 size={16} />
-                </button>
+                {deletingDraftId === draft.id ? (
+                  <div style={{ display: 'flex', gap: '0.25rem' }}>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        deleteDraft(draft.id);
+                        if (selectedDraftId === draft.id) {
+                          setSelectedDraftId(null);
+                        }
+                        setDeletingDraftId(null);
+                      }}
+                      style={{
+                        padding: '0.4rem',
+                        borderRadius: 'var(--radius-sm)',
+                        backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                        color: '#22c55e',
+                        border: 'none',
+                        cursor: 'pointer'
+                      }}
+                      title="确认删除"
+                    >
+                      <Check size={16} />
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setDeletingDraftId(null);
+                      }}
+                      style={{
+                        padding: '0.4rem',
+                        borderRadius: 'var(--radius-sm)',
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                        color: '#ef4444',
+                        border: 'none',
+                        cursor: 'pointer'
+                      }}
+                      title="取消"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setDeletingDraftId(draft.id);
+                    }}
+                    style={{
+                      padding: '0.4rem',
+                      borderRadius: 'var(--radius-sm)',
+                      transition: 'var(--transition)',
+                      cursor: 'pointer',
+                      backgroundColor: 'transparent',
+                      border: '1px solid transparent',
+                      color: 'var(--text-secondary)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.color = '#ef4444';
+                      e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.color = 'var(--text-secondary)';
+                      e.currentTarget.style.backgroundColor = 'transparent';
+                    }}
+                    title="删除草稿"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                )}
               </div>
             ))
           )}

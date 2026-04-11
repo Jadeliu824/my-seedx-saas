@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useWorkflow } from '../context/WorkflowContext';
-import { Send, ArrowRight, Mic, MicOff, Trash2 } from 'lucide-react';
+import { Send, ArrowRight, Mic, MicOff, Trash2, X, Check } from 'lucide-react';
 
 // Declare Web Speech API types
 declare global {
@@ -31,6 +31,7 @@ export function IdeaInbox({ isMobile }: { isMobile?: boolean }) {
   const { ideas, addIdea, updateIdeaStatus, addDraft, deleteIdea } = useWorkflow();
   const [inputText, setInputText] = useState('');
   const [isRecording, setIsRecording] = useState(false);
+  const [deletingIdeaId, setDeletingIdeaId] = useState<string | null>(null);
   
   const recognitionRef = useRef<SpeechRecognition | null>(null);
 
@@ -209,39 +210,82 @@ export function IdeaInbox({ isMobile }: { isMobile?: boolean }) {
                 </span>
               </div>
               <div style={{ display: 'flex', gap: '0.75rem', alignSelf: isMobile ? 'flex-end' : 'flex-start' }}>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (window.confirm('确定要删除这个选题想法吗？')) {
-                      deleteIdea(idea.id);
-                    }
-                  }}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    backgroundColor: 'transparent',
-                    border: '1px solid var(--border-color)',
-                    padding: '0.6rem',
-                    borderRadius: 'var(--radius-sm)',
-                    transition: 'var(--transition)',
-                    color: 'var(--text-secondary)',
-                    cursor: 'pointer'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.color = '#ef4444';
-                    e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
-                    e.currentTarget.style.borderColor = '#ef4444';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.color = 'var(--text-secondary)';
-                    e.currentTarget.style.backgroundColor = 'transparent';
-                    e.currentTarget.style.borderColor = 'var(--border-color)';
-                  }}
-                  title="删除"
-                >
-                  <Trash2 size={18} />
-                </button>
+                {deletingIdeaId === idea.id ? (
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        deleteIdea(idea.id);
+                        setDeletingIdeaId(null);
+                      }}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.25rem',
+                        padding: '0.5rem 0.75rem',
+                        borderRadius: 'var(--radius-md)',
+                        backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                        color: '#22c55e',
+                        border: 'none',
+                        cursor: 'pointer',
+                        fontSize: '0.75rem',
+                        fontWeight: 600
+                      }}
+                    >
+                      <Check size={14} /> 确认
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setDeletingIdeaId(null);
+                      }}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.25rem',
+                        padding: '0.5rem 0.75rem',
+                        borderRadius: 'var(--radius-md)',
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                        color: '#ef4444',
+                        border: 'none',
+                        cursor: 'pointer',
+                        fontSize: '0.75rem',
+                        fontWeight: 600
+                      }}
+                    >
+                      <X size={14} /> 取消
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setDeletingIdeaId(idea.id);
+                    }}
+                    style={{
+                      padding: '0.5rem',
+                      borderRadius: 'var(--radius-md)',
+                      color: 'var(--text-muted)',
+                      transition: 'var(--transition)',
+                      border: '1px solid var(--border-color)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.color = '#ef4444';
+                      e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
+                      e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.2)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.color = 'var(--text-muted)';
+                      e.currentTarget.style.backgroundColor = 'transparent';
+                      e.currentTarget.style.borderColor = 'var(--border-color)';
+                    }}
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                )}
 
                 <button
                   onClick={() => handleDeepen(idea.id, idea.content)}
