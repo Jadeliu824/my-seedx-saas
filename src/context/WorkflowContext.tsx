@@ -83,8 +83,9 @@ export function WorkflowProvider({ children }: { children: React.ReactNode }) {
 
     unsubs.push(
       onSnapshot(col('ideas'), (snap) => {
-        setIdeas(snap.docs.map((d) => ({ ...(d.data() as Omit<Idea, 'id'>), id: d.id })));
-      }),
+        const list = snap.docs.map((d) => ({ ...(d.data() as Omit<Idea, 'id'>), id: d.id }));
+        setIdeas(list.sort((a, b) => b.createdAt - a.createdAt));
+      }, (err) => console.error('Ideas listener error:', err)),
     );
 
     unsubs.push(
@@ -109,8 +110,9 @@ export function WorkflowProvider({ children }: { children: React.ReactNode }) {
 
     unsubs.push(
       onSnapshot(col('drafts'), (snap) => {
-        setDrafts(snap.docs.map((d) => ({ ...(d.data() as Omit<Draft, 'id'>), id: d.id })));
-      }),
+        const list = snap.docs.map((d) => ({ ...(d.data() as Omit<Draft, 'id'>), id: d.id }));
+        setDrafts(list.sort((a, b) => b.createdAt - a.createdAt));
+      }, (err) => console.error('Drafts listener error:', err)),
     );
 
     unsubs.push(
@@ -124,19 +126,44 @@ export function WorkflowProvider({ children }: { children: React.ReactNode }) {
 
   // ── Ideas ──────────────────────────────────────────────────────────────────
 
-  const addIdea = (content: string) => {
+  const addIdea = async (content: string) => {
     if (!user) return;
     const id = uuidv4();
     const newIdea: Idea = { id, content, createdAt: Date.now(), status: 'inbox' };
-    // Optimistic
+    
+    // Optimistic Update
     setIdeas((prev) => [newIdea, ...prev]);
-    setDoc(doc(col('ideas'), id), { content, createdAt: newIdea.createdAt, status: 'inbox' });
+    
+    try {
+      await setDoc(doc(col('ideas'), id), { 
+        content, 
+        createdAt: newIdea.createdAt, 
+        status: 'inbox' 
+      });
+      console.log('Idea saved successfully:', id);
+    } catch (err) {
+      console.error('Failed to add idea:', err);
+      alert('想法保存失败，请检查网络连接或登录状态。');
+      // Revert optimistic update
+      setIdeas((prev) => prev.filter(i => i.id !== id));
+    }
   };
 
-  const updateIdeaStatus = (id: string, status: ContentStatus) => {
+  const updateIdeaStatus = async (id: string, status: ContentStatus) => {
     if (!user) return;
+    const originalStatus = ideas.find(i => i.id === id)?.status;
+    
     setIdeas((prev) => prev.map((idea) => (idea.id === id ? { ...idea, status } : idea)));
-    setDoc(doc(col('ideas'), id), { status }, { merge: true });
+    
+    try {
+      await setDoc(doc(col('ideas'), id), { status }, { merge: true });
+    } catch (err) {
+      console.error('Failed to update status:', err);
+      // Revert
+      if (originalStatus) {
+        setIdeas((prev) => prev.map((idea) => (idea.id === id ? { ...idea, status: originalStatus } : idea)));
+      }
+    }
   };
 
   const deleteIdea = (id: string) => {
