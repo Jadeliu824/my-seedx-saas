@@ -76,7 +76,7 @@ export function DraftGenerator({ isMobile }: { isMobile?: boolean }) {
 想法原文："""${currentIdea.content}"""
 
 输出格式：
-三个版本之间用「---」分隔。直接输出内容，不要任何开场白或解释。`;
+三个版本之间用唯一的「【PART_BREAK】」符号分隔。直接输出内容，不要任何开场白或解释。`;
 
     try {
       const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
@@ -100,10 +100,16 @@ export function DraftGenerator({ isMobile }: { isMobile?: boolean }) {
       const data = await response.json();
       const text = data.choices[0]?.message?.content || '';
 
-      // Split by "---" separator
-      const parts = text.split(/---/).map((part: string) => part.trim());
+      // Split by robust separator
+      const parts = text.split(/【PART_BREAK】/).map((part: string) => {
+        // Clean up common AI headings if they were hallucinated into the content
+        return part.trim()
+          .replace(/^【版本[一二三]：[^】]+】\n?/i, '')
+          .replace(/^#+ [^ \n]+\n?/i, '')
+          .trim();
+      });
 
-      // Ensure we have exactly 3 parts, if not, handle gracefully
+      // Ensure we have results, fallback to failed text if needed
       const xiaohongshu = parts.length > 0 ? parts[0] : '生成失败';
       const chineseTweet = parts.length > 1 ? parts[1] : '生成失败';
       const englishTweet = parts.length > 2 ? parts[2] : '生成失败';
