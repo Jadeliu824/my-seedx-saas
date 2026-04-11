@@ -214,7 +214,7 @@ export function WorkflowProvider({ children }: { children: React.ReactNode }) {
     );
     setDoc(
       doc(col('drafts'), draftId),
-      { drafts: { [platform]: { platform, content, metadata } } },
+      { drafts: { [platform]: { platform, content, metadata: metadata || {} } } },
       { merge: true },
     );
   };
