@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useWorkflow } from '../context/WorkflowContext';
 import { BookOpen, Quote, Target, Lightbulb, Plus } from 'lucide-react';
+import { MaterialType } from '../types';
 
 export function MaterialLibrary({ isMobile }: { isMobile?: boolean }) {
   const { materials, addMaterial } = useWorkflow();
