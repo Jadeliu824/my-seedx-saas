@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useWorkflow } from '../context/WorkflowContext';
-import { Sparkles, Copy, CheckCircle2 } from 'lucide-react';
+import { Sparkles, Copy, CheckCircle2, Trash2 } from 'lucide-react';
 
 export function DraftGenerator({ isMobile }: { isMobile?: boolean }) {
-  const { drafts, ideas, updatePlatformDraft } = useWorkflow();
+  const { drafts, ideas, updatePlatformDraft, deleteDraft } = useWorkflow();
   const [selectedDraftId, setSelectedDraftId] = useState<string | null>(null);
   
   // Local state for the generated results
@@ -40,8 +40,11 @@ export function DraftGenerator({ isMobile }: { isMobile?: boolean }) {
       } else {
         setGeneratedResults(null);
       }
+    } else if (!currentDraft && !isGenerating) {
+      // Clear results if no draft is selected (e.g., after deletion)
+      setGeneratedResults(null);
     }
-  }, [selectedDraftId, drafts, isGenerating]);
+  }, [selectedDraftId, drafts, isGenerating, currentDraft]);
 
   const handleDeepen = async () => {
     if (!currentIdea) return;
@@ -165,9 +168,10 @@ export function DraftGenerator({ isMobile }: { isMobile?: boolean }) {
         updatePlatformDraft(currentDraft!.id, 'twitter_en', englishTweet);
       }
 
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
       console.error('AI Generation Error:', err);
-      alert(`生成失败: ${err.message || "请检查网络连接或 API Key"}`);
+      alert(`生成失败: ${message || "请检查网络连接或 API Key"}`);
     } finally {
       setIsGenerating(false);
     }
@@ -213,15 +217,63 @@ export function DraftGenerator({ isMobile }: { isMobile?: boolean }) {
                   border: '1px solid',
                   borderColor: selectedDraftId === draft.id ? 'var(--accent-primary)' : 'var(--border-color)',
                   marginBottom: '0.5rem',
-                  transition: 'var(--transition)'
+                  transition: 'var(--transition)',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  gap: '0.5rem'
                 }}
               >
-                <h4 style={{ fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.25rem' }}>
-                  {draft.title || '无标题'}
-                </h4>
-                <p className="text-muted" style={{ fontSize: '0.75rem' }}>
-                  {new Date(draft.createdAt).toLocaleDateString()}
-                </p>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <h4 style={{ 
+                    fontSize: '0.875rem', 
+                    fontWeight: 500, 
+                    marginBottom: '0.25rem',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap'
+                  }}>
+                    {draft.title || '无标题'}
+                  </h4>
+                  <p className="text-muted" style={{ fontSize: '0.75rem' }}>
+                    {new Date(draft.createdAt).toLocaleDateString()}
+                  </p>
+                </div>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (window.confirm('确定要删除这个草稿吗？')) {
+                      deleteDraft(draft.id);
+                      if (selectedDraftId === draft.id) {
+                        setSelectedDraftId(null);
+                      }
+                    }
+                  }}
+                  style={{
+                    padding: '0.4rem',
+                    borderRadius: 'var(--radius-sm)',
+                    transition: 'var(--transition)',
+                    cursor: 'pointer',
+                    backgroundColor: 'transparent',
+                    border: '1px solid transparent',
+                    color: 'var(--text-secondary)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.color = '#ef4444';
+                    e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.color = 'var(--text-secondary)';
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                  }}
+                  title="删除草稿"
+                >
+                  <Trash2 size={16} />
+                </button>
               </div>
             ))
           )}

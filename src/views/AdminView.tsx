@@ -1,8 +1,15 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
 
+interface WaitlistEntry {
+  id: string;
+  name: string | null;
+  email: string;
+  created_at: string;
+}
+
 export function AdminView() {
-  const [waitlist, setWaitlist] = useState<any[]>([]);
+  const [waitlist, setWaitlist] = useState<WaitlistEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

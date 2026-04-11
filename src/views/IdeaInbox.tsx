@@ -1,40 +1,56 @@
 import { useState, useRef, useEffect } from 'react';
 import { useWorkflow } from '../context/WorkflowContext';
-import { Send, ArrowRight, Mic, MicOff } from 'lucide-react';
+import { Send, ArrowRight, Mic, MicOff, Trash2 } from 'lucide-react';
 
 // Declare Web Speech API types
 declare global {
   interface Window {
-    SpeechRecognition: any;
-    webkitSpeechRecognition: any;
+    SpeechRecognition: unknown;
+    webkitSpeechRecognition: unknown;
+  }
+  interface SpeechRecognition extends EventTarget {
+    continuous: boolean;
+    interimResults: boolean;
+    lang: string;
+    onresult: (event: SpeechRecognitionEvent) => void;
+    onerror: (event: SpeechRecognitionErrorEvent) => void;
+    onend: () => void;
+    start: () => void;
+    stop: () => void;
+  }
+  interface SpeechRecognitionEvent extends Event {
+    resultIndex: number;
+    results: SpeechRecognitionResultList;
+  }
+  interface SpeechRecognitionErrorEvent extends Event {
+    error: string;
   }
 }
 
 export function IdeaInbox({ isMobile }: { isMobile?: boolean }) {
-  const { ideas, addIdea, updateIdeaStatus, addDraft } = useWorkflow();
+  const { ideas, addIdea, updateIdeaStatus, addDraft, deleteIdea } = useWorkflow();
   const [inputText, setInputText] = useState('');
   const [isRecording, setIsRecording] = useState(false);
   
-  const recognitionRef = useRef<any>(null);
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
 
   useEffect(() => {
-    // Initialize speech recognition
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (SpeechRecognition) {
       const recognition = new SpeechRecognition();
       recognition.continuous = true;
       recognition.interimResults = true;
       recognition.lang = 'zh-CN'; // Set language
 
-      recognition.onresult = (event: any) => {
+      recognition.onresult = (event: SpeechRecognitionEvent) => {
         let finalTranscript = '';
-        let interimTranscript = '';
         
         for (let i = event.resultIndex; i < event.results.length; ++i) {
           if (event.results[i].isFinal) {
             finalTranscript += event.results[i][0].transcript;
           } else {
-            interimTranscript += event.results[i][0].transcript;
+            // interimTranscript += event.results[i][0].transcript;
           }
         }
         
@@ -44,7 +60,7 @@ export function IdeaInbox({ isMobile }: { isMobile?: boolean }) {
         }
       };
 
-      recognition.onerror = (event: any) => {
+      recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
         console.error('Speech recognition error', event.error);
         setIsRecording(false);
       };
@@ -192,33 +208,68 @@ export function IdeaInbox({ isMobile }: { isMobile?: boolean }) {
                   {new Date(idea.createdAt).toLocaleString('zh-CN')}
                 </span>
               </div>
-              <button
-                onClick={() => handleDeepen(idea.id, idea.content)}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  backgroundColor: 'transparent',
-                  border: '1px solid var(--accent-primary)',
-                  color: 'var(--accent-primary)',
-                  padding: '0.5rem 1rem',
-                  borderRadius: 'var(--radius-sm)',
-                  fontSize: '0.875rem',
-                  fontWeight: 600,
-                  transition: 'var(--transition)'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = 'var(--accent-primary)';
-                  e.currentTarget.style.color = '#000000';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'transparent';
-                  e.currentTarget.style.color = 'var(--accent-primary)';
-                }}
-              >
-                深化
-                <ArrowRight size={16} />
-              </button>
+              <div style={{ display: 'flex', gap: '0.75rem', alignSelf: isMobile ? 'flex-end' : 'flex-start' }}>
+                <button
+                  onClick={() => {
+                    if (window.confirm('确定要删除这个选题想法吗？')) {
+                      deleteIdea(idea.id);
+                    }
+                  }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    backgroundColor: 'transparent',
+                    border: '1px solid var(--border-color)',
+                    padding: '0.6rem',
+                    borderRadius: 'var(--radius-sm)',
+                    transition: 'var(--transition)',
+                    color: 'var(--text-secondary)',
+                    cursor: 'pointer'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.color = '#ef4444';
+                    e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
+                    e.currentTarget.style.borderColor = '#ef4444';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.color = 'var(--text-secondary)';
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                    e.currentTarget.style.borderColor = 'var(--border-color)';
+                  }}
+                  title="删除"
+                >
+                  <Trash2 size={18} />
+                </button>
+
+                <button
+                  onClick={() => handleDeepen(idea.id, idea.content)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    backgroundColor: 'transparent',
+                    border: '1px solid var(--accent-primary)',
+                    color: 'var(--accent-primary)',
+                    padding: '0.5rem 1rem',
+                    borderRadius: 'var(--radius-sm)',
+                    fontSize: '0.875rem',
+                    fontWeight: 600,
+                    transition: 'var(--transition)'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = 'var(--accent-primary)';
+                    e.currentTarget.style.color = '#000000';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                    e.currentTarget.style.color = 'var(--accent-primary)';
+                  }}
+                >
+                  深化
+                  <ArrowRight size={16} />
+                </button>
+              </div>
             </div>
           ))
         )}

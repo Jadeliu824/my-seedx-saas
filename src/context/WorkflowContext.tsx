@@ -21,10 +21,12 @@ interface WorkflowContextType {
 
   materials: Material[];
   addMaterial: (material: Omit<Material, 'id'>) => void;
+  deleteMaterial: (id: string) => void;
 
   drafts: Draft[];
   addDraft: (ideaId: string, title?: string) => string;
-  updatePlatformDraft: (draftId: string, platform: PlatformDraft['platform'], content: string, metadata?: any) => void;
+  updatePlatformDraft: (draftId: string, platform: PlatformDraft['platform'], content: string, metadata?: Record<string, unknown>) => void;
+  deleteDraft: (id: string) => void;
 
   analytics: AnalyticsRecord[];
   addAnalyticsRecord: (record: Omit<AnalyticsRecord, 'id'>) => void;
@@ -69,12 +71,13 @@ export function WorkflowProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!user) {
-      // Logged out — clear local state
-      setIdeas([]);
-      setMaterials([]);
-      setDrafts([]);
-      setAnalytics([]);
-      seededRef.current = false;
+      setTimeout(() => {
+        setIdeas(prev => prev.length === 0 ? prev : []);
+        setMaterials(prev => prev.length === 0 ? prev : []);
+        setDrafts(prev => prev.length === 0 ? prev : []);
+        setAnalytics(prev => prev.length === 0 ? prev : []);
+        seededRef.current = false;
+      }, 0);
       return;
     }
 
@@ -122,6 +125,7 @@ export function WorkflowProvider({ children }: { children: React.ReactNode }) {
     );
 
     return () => unsubs.forEach((u) => u());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   // ── Ideas ──────────────────────────────────────────────────────────────────
@@ -185,6 +189,12 @@ export function WorkflowProvider({ children }: { children: React.ReactNode }) {
     setDoc(doc(col('materials'), id), material);
   };
 
+  const deleteMaterial = (id: string) => {
+    if (!user) return;
+    setMaterials((prev) => prev.filter((m) => m.id !== id));
+    deleteDoc(doc(col('materials'), id));
+  };
+
   // ── Drafts ─────────────────────────────────────────────────────────────────
 
   const addDraft = (ideaId: string, title: string = 'Untitled Draft') => {
@@ -200,7 +210,7 @@ export function WorkflowProvider({ children }: { children: React.ReactNode }) {
     draftId: string,
     platform: PlatformDraft['platform'],
     content: string,
-    metadata?: any,
+    metadata?: Record<string, unknown>,
   ) => {
     if (!user) return;
     setDrafts((prev) =>
@@ -219,6 +229,12 @@ export function WorkflowProvider({ children }: { children: React.ReactNode }) {
     );
   };
 
+  const deleteDraft = (id: string) => {
+    if (!user) return;
+    setDrafts((prev) => prev.filter((d) => d.id !== id));
+    deleteDoc(doc(col('drafts'), id));
+  };
+
   // ── Analytics ──────────────────────────────────────────────────────────────
 
   const addAnalyticsRecord = (record: Omit<AnalyticsRecord, 'id'>) => {
@@ -231,8 +247,8 @@ export function WorkflowProvider({ children }: { children: React.ReactNode }) {
   return (
     <WorkflowContext.Provider value={{
       ideas, addIdea, updateIdeaStatus, deleteIdea,
-      materials, addMaterial,
-      drafts, addDraft, updatePlatformDraft,
+      materials, addMaterial, deleteMaterial,
+      drafts, addDraft, updatePlatformDraft, deleteDraft,
       analytics, addAnalyticsRecord,
     }}>
       {children}
@@ -240,6 +256,7 @@ export function WorkflowProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useWorkflow() {
   const context = useContext(WorkflowContext);
   if (context === undefined) throw new Error('useWorkflow must be used within a WorkflowProvider');

@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { useWorkflow } from '../context/WorkflowContext';
-import { BookOpen, Quote, Target, Lightbulb, Plus } from 'lucide-react';
+import { BookOpen, Quote, Target, Lightbulb, Plus, Trash2 } from 'lucide-react';
 import type { MaterialType } from '../types';
 
 export function MaterialLibrary({ isMobile }: { isMobile?: boolean }) {
-  const { materials, addMaterial } = useWorkflow();
+  const { materials, addMaterial, deleteMaterial } = useWorkflow();
   const [activeTab, setActiveTab] = useState('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -46,12 +46,11 @@ export function MaterialLibrary({ isMobile }: { isMobile?: boolean }) {
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', position: 'relative' }}>
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: isMobile ? 'flex-start' : 'center', marginBottom: '2rem', flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? '1rem' : '0' }}>
         <div>
-          <h2 style={{ fontSize: '1.875rem', fontWeight: 700 }}>内容素材库 (v2.0)</h2>
+          <h2 style={{ fontSize: '1.875rem', fontWeight: 700 }}>内容素材库</h2>
           <p className="text-muted" style={{ marginTop: '0.5rem' }}>从碰运气到系统化，你的创作地基。</p>
         </div>
         <button
           onClick={() => {
-            console.log('Add Material button clicked');
             setIsModalOpen(true);
           }}
           className="btn-primary"
@@ -189,7 +188,41 @@ export function MaterialLibrary({ isMobile }: { isMobile?: boolean }) {
               )}
             </div>
             
-            <h3 style={{ fontSize: '1.125rem', fontWeight: 600 }}>{mat.title}</h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <h3 style={{ fontSize: '1.125rem', fontWeight: 600 }}>{mat.title}</h3>
+              <button
+                onClick={() => {
+                  if (window.confirm('确定要删除这条素材吗？')) {
+                    deleteMaterial(mat.id);
+                  }
+                }}
+                style={{
+                  padding: '0.4rem',
+                  borderRadius: 'var(--radius-sm)',
+                  transition: 'var(--transition)',
+                  cursor: 'pointer',
+                  backgroundColor: 'transparent',
+                  border: '1px solid transparent',
+                  color: 'var(--text-secondary)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = '#ef4444';
+                  e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
+                  e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.2)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = 'var(--text-secondary)';
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.borderColor = 'transparent';
+                }}
+                title="删除素材"
+              >
+                <Trash2 size={18} />
+              </button>
+            </div>
             
             <p className="text-muted" style={{ fontSize: '0.875rem', lineHeight: 1.6, flex: 1 }}>
               {mat.content}

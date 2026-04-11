@@ -11,7 +11,7 @@ interface SidebarProps {
 export function Sidebar({ currentView, onViewChange, isMobile }: SidebarProps) {
   const { user, loginWithGoogle, logout } = useAuth();
 
-  const navItems: { id: ViewState; label: string; icon: React.FC<any> }[] = [
+  const navItems: { id: ViewState; label: string; icon: React.ElementType }[] = [
     { id: 'inbox', label: '记录', icon: Lightbulb },
     { id: 'drafts', label: '深化', icon: Edit3 },
     { id: 'materials', label: '素材', icon: Layers },
@@ -73,7 +73,7 @@ export function Sidebar({ currentView, onViewChange, isMobile }: SidebarProps) {
               src={user.photoURL || ''} 
               alt="me" 
               style={{ width: 20, height: 20, borderRadius: '50%' }} 
-              onError={(e) => { (e.target as any).style.display = 'none' }}
+              onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none' }}
             />
             {!user.photoURL && <User size={20} />}
             <span style={{ fontSize: '0.625rem' }}>退出</span>
