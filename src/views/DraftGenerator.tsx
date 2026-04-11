@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useWorkflow } from '../context/WorkflowContext';
 import { Sparkles, Copy, CheckCircle2 } from 'lucide-react';
 
@@ -22,8 +22,26 @@ export function DraftGenerator({ isMobile }: { isMobile?: boolean }) {
   // Handle Draft Selection Change
   const handleSelectDraft = (id: string) => {
     setSelectedDraftId(id);
-    setGeneratedResults(null); // Reset results when switching drafts
   };
+
+  // Sync state with currentDraft data
+  useEffect(() => {
+    if (currentDraft && !isGenerating) {
+      const xhs = currentDraft.drafts['xiaohongshu']?.content || '';
+      const cnTweet = currentDraft.drafts['twitter_cn']?.content || '';
+      const enTweet = currentDraft.drafts['twitter_en']?.content || '';
+
+      if (xhs || cnTweet || enTweet) {
+        setGeneratedResults({
+          xiaohongshu: xhs,
+          chineseTweet: cnTweet,
+          englishTweet: enTweet
+        });
+      } else {
+        setGeneratedResults(null);
+      }
+    }
+  }, [selectedDraftId, drafts, isGenerating]);
 
   const handleDeepen = async () => {
     if (!currentIdea) return;
@@ -136,9 +154,15 @@ export function DraftGenerator({ isMobile }: { isMobile?: boolean }) {
         englishTweet
       });
 
-      // Save the Xiaohongshu content back to context
+      // Save all content back to context
       if (xiaohongshu && xiaohongshu !== '生成失败') {
          updatePlatformDraft(currentDraft!.id, 'xiaohongshu', xiaohongshu);
+      }
+      if (chineseTweet && chineseTweet !== '生成失败') {
+        updatePlatformDraft(currentDraft!.id, 'twitter_cn', chineseTweet);
+      }
+      if (englishTweet && englishTweet !== '生成失败') {
+        updatePlatformDraft(currentDraft!.id, 'twitter_en', englishTweet);
       }
 
     } catch (err: any) {

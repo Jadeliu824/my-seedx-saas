@@ -18,7 +18,7 @@ export interface Material {
 }
 
 export interface PlatformDraft {
-  platform: 'twitter' | 'xiaohongshu' | 'youtube' | 'instagram';
+  platform: 'twitter' | 'xiaohongshu' | 'youtube' | 'instagram' | 'twitter_cn' | 'twitter_en';
   content: string; // the generated content
   metadata?: any;  // e.g. title options, cover suggestions
 }
