@@ -47,7 +47,8 @@ export function DraftGenerator({ isMobile }: { isMobile?: boolean }) {
   }, [selectedDraftId, drafts, isGenerating, currentDraft]);
 
   const handleDeepen = async () => {
-    if (!currentIdea) return;
+    if (!currentIdea || !currentDraft) return;
+    const draftId = currentDraft.id;
     
     if (!import.meta.env.VITE_DEEPSEEK_API_KEY) {
       alert("请在 .env.local 中配置 VITE_DEEPSEEK_API_KEY");
@@ -157,15 +158,20 @@ export function DraftGenerator({ isMobile }: { isMobile?: boolean }) {
         englishTweet
       });
 
-      // Save all content back to context
-      if (xiaohongshu && xiaohongshu !== '生成失败') {
-         updatePlatformDraft(currentDraft!.id, 'xiaohongshu', xiaohongshu);
-      }
-      if (chineseTweet && chineseTweet !== '生成失败') {
-        updatePlatformDraft(currentDraft!.id, 'twitter_cn', chineseTweet);
-      }
-      if (englishTweet && englishTweet !== '生成失败') {
-        updatePlatformDraft(currentDraft!.id, 'twitter_en', englishTweet);
+      // Save all content back to context if draft still exists
+      const draftExists = drafts.find(d => d.id === draftId);
+      if (draftExists) {
+        if (xiaohongshu && xiaohongshu !== '生成失败') {
+          updatePlatformDraft(draftId, 'xiaohongshu', xiaohongshu);
+        }
+        if (chineseTweet && chineseTweet !== '生成失败') {
+          updatePlatformDraft(draftId, 'twitter_cn', chineseTweet);
+        }
+        if (englishTweet && englishTweet !== '生成失败') {
+          updatePlatformDraft(draftId, 'twitter_en', englishTweet);
+        }
+      } else {
+        console.warn('Draft was deleted during generation, skipping save.');
       }
 
     } catch (err: unknown) {

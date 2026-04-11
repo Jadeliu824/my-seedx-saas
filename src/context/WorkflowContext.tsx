@@ -67,7 +67,13 @@ export function WorkflowProvider({ children }: { children: React.ReactNode }) {
   const seededRef = useRef(false);
 
   // Helper: user's sub-collections
-  const col = (name: string) => collection(db, 'users', user!.uid, name);
+  const col = (name: string) => {
+    if (!user) {
+      console.warn(`Attempted to access collection ${name} without authenticated user`);
+      throw new Error('Not authenticated');
+    }
+    return collection(db, 'users', user.uid, name);
+  };
 
   useEffect(() => {
     if (!user) {
@@ -170,14 +176,21 @@ export function WorkflowProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const deleteIdea = (id: string) => {
+  const deleteIdea = async (id: string) => {
     if (!user) return;
-    setIdeas((prev) => prev.filter((idea) => idea.id !== id));
-    // Also cleanup associated drafts
-    const toDelete = drafts.filter((d) => d.ideaId === id);
-    setDrafts((prev) => prev.filter((d) => d.ideaId !== id));
-    deleteDoc(doc(col('ideas'), id));
-    toDelete.forEach((d) => deleteDoc(doc(col('drafts'), d.id)));
+    try {
+      setIdeas((prev) => prev.filter((idea) => idea.id !== id));
+      // Also cleanup associated drafts
+      const toDelete = drafts.filter((d) => d.ideaId === id);
+      setDrafts((prev) => prev.filter((d) => d.ideaId !== id));
+      
+      await deleteDoc(doc(col('ideas'), id));
+      for (const d of toDelete) {
+        await deleteDoc(doc(col('drafts'), d.id));
+      }
+    } catch (error) {
+      console.error('Failed to delete idea:', error);
+    }
   };
 
   // ── Materials ──────────────────────────────────────────────────────────────
@@ -189,10 +202,14 @@ export function WorkflowProvider({ children }: { children: React.ReactNode }) {
     setDoc(doc(col('materials'), id), material);
   };
 
-  const deleteMaterial = (id: string) => {
+  const deleteMaterial = async (id: string) => {
     if (!user) return;
-    setMaterials((prev) => prev.filter((m) => m.id !== id));
-    deleteDoc(doc(col('materials'), id));
+    try {
+      setMaterials((prev) => prev.filter((m) => m.id !== id));
+      await deleteDoc(doc(col('materials'), id));
+    } catch (error) {
+      console.error('Failed to delete material:', error);
+    }
   };
 
   // ── Drafts ─────────────────────────────────────────────────────────────────
@@ -229,10 +246,14 @@ export function WorkflowProvider({ children }: { children: React.ReactNode }) {
     );
   };
 
-  const deleteDraft = (id: string) => {
+  const deleteDraft = async (id: string) => {
     if (!user) return;
-    setDrafts((prev) => prev.filter((d) => d.id !== id));
-    deleteDoc(doc(col('drafts'), id));
+    try {
+      setDrafts((prev) => prev.filter((d) => d.id !== id));
+      await deleteDoc(doc(col('drafts'), id));
+    } catch (error) {
+      console.error('Failed to delete draft:', error);
+    }
   };
 
   // ── Analytics ──────────────────────────────────────────────────────────────

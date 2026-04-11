@@ -210,7 +210,8 @@ export function IdeaInbox({ isMobile }: { isMobile?: boolean }) {
               </div>
               <div style={{ display: 'flex', gap: '0.75rem', alignSelf: isMobile ? 'flex-end' : 'flex-start' }}>
                 <button
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.stopPropagation();
                     if (window.confirm('确定要删除这个选题想法吗？')) {
                       deleteIdea(idea.id);
                     }
