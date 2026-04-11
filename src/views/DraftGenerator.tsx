@@ -93,7 +93,8 @@ export function DraftGenerator({ isMobile }: { isMobile?: boolean }) {
       });
 
       if (!response.ok) {
-        throw new Error(`API request failed with status ${response.status}`);
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(`API 请求失败 (状态码: ${response.status}): ${errorData.error?.message || response.statusText}`);
       }
 
       const data = await response.json();
@@ -118,9 +119,9 @@ export function DraftGenerator({ isMobile }: { isMobile?: boolean }) {
          updatePlatformDraft(currentDraft!.id, 'xiaohongshu', xiaohongshu);
       }
 
-    } catch (err) {
-      console.error(err);
-      alert("生成失败，请检查网络或 API Key");
+    } catch (err: any) {
+      console.error('AI Generation Error:', err);
+      alert(`生成失败: ${err.message || "请检查网络连接或 API Key"}`);
     } finally {
       setIsGenerating(false);
     }
