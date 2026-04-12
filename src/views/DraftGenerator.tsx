@@ -114,6 +114,7 @@ export function DraftGenerator({ isMobile }: { isMobile?: boolean }) {
 【全局要求】
 - 绝对禁止使用：首先/其次/最后、深度/赋能/破局/内卷/干货/划重点/建议收藏/本质上/维度。
 - 绝对禁止使用：❗🔥✅ 以及任何感叹号。
+- 绝对禁止使用：任何 Markdown 格式（如 **、*、#、- 等），输出必须是纯文本，方便直接复制粘贴发布。
 - 以短句为主，拒绝长难句。像人在说话，有呼吸感。
 - 每一个词都要有分量，不写废话。
 
@@ -174,9 +175,13 @@ export function DraftGenerator({ isMobile }: { isMobile?: boolean }) {
       // Split by robust separator
       const parts = text.split(/【PART_BREAK】/).map((part: string) => {
         // Clean up common AI headings if they were hallucinated into the content
+        // Also strip any remaining markdown symbols to ensure plain text
         return part.trim()
           .replace(/^【版本[一二三]：[^】]+】\n?/i, '')
           .replace(/^#+ [^ \n]+\n?/i, '')
+          .replace(/\*\*/g, '') // Remove bold
+          .replace(/\*/g, '')   // Remove italic/bullets
+          .replace(/#+ /g, '')  // Remove headers
           .trim();
       });
 
