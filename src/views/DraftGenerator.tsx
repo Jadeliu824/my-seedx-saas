@@ -16,7 +16,32 @@ export function DraftGenerator({ isMobile }: { isMobile?: boolean }) {
   
   const [copiedSection, setCopiedSection] = useState<string | null>(null);
   const [deletingDraftId, setDeletingDraftId] = useState<string | null>(null);
+  
+  // Usage limit state
+  const [usageCount, setUsageCount] = useState(0);
 
+  // Constants
+  const DAILY_LIMIT = 3;
+  const USAGE_KEY = 'seedx_deepen_usage';
+
+  // Load and refresh usage data
+  useEffect(() => {
+    const today = new Date().toLocaleDateString();
+    const stored = localStorage.getItem(USAGE_KEY);
+    
+    if (stored) {
+      const { date, count } = JSON.parse(stored);
+      if (date === today) {
+        setUsageCount(count);
+      } else {
+        // New day, reset
+        setUsageCount(0);
+        localStorage.setItem(USAGE_KEY, JSON.stringify({ date: today, count: 0 }));
+      }
+    } else {
+      localStorage.setItem(USAGE_KEY, JSON.stringify({ date: today, count: 0 }));
+    }
+  }, []);
   const currentDraft = drafts.find(d => d.id === selectedDraftId);
   const currentIdea = currentDraft ? ideas.find(i => i.id === currentDraft.ideaId) : null;
 
@@ -49,6 +74,13 @@ export function DraftGenerator({ isMobile }: { isMobile?: boolean }) {
 
   const handleDeepen = async () => {
     if (!currentIdea || !currentDraft) return;
+    
+    // Check usage limit
+    if (usageCount >= DAILY_LIMIT) {
+      alert("今日 3 次 AI 深化额度已用完，请明天再试。");
+      return;
+    }
+
     const draftId = currentDraft.id;
     
     if (!import.meta.env.VITE_DEEPSEEK_API_KEY) {
@@ -171,6 +203,12 @@ export function DraftGenerator({ isMobile }: { isMobile?: boolean }) {
         if (englishTweet && englishTweet !== '生成失败') {
           updatePlatformDraft(draftId, 'twitter_en', englishTweet);
         }
+        
+        // Success: Increment usage
+        const today = new Date().toLocaleDateString();
+        const newCount = usageCount + 1;
+        setUsageCount(newCount);
+        localStorage.setItem(USAGE_KEY, JSON.stringify({ date: today, count: newCount }));
       } else {
         console.warn('Draft was deleted during generation, skipping save.');
       }
@@ -339,15 +377,37 @@ export function DraftGenerator({ isMobile }: { isMobile?: boolean }) {
             </section>
 
             {/* Action Bar */}
-            <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', alignItems: 'flex-start' }}>
               <button
                 onClick={handleDeepen}
-                disabled={isGenerating}
+                disabled={isGenerating || usageCount >= DAILY_LIMIT}
                 className="btn-primary"
+                style={{
+                  opacity: (isGenerating || usageCount >= DAILY_LIMIT) ? 0.6 : 1,
+                  cursor: (isGenerating || usageCount >= DAILY_LIMIT) ? 'not-allowed' : 'pointer'
+                }}
               >
                 <Sparkles size={18} />
-                {isGenerating ? 'AI 正在深度思考...' : 'AI 深化'}
+                {isGenerating ? 'AI 正在深度思考...' : usageCount >= DAILY_LIMIT ? '今日次数已用完' : 'AI 深化'}
               </button>
+              
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-muted)', fontSize: '0.75rem' }}>
+                <div style={{ 
+                  width: '100px', 
+                  height: '4px', 
+                  backgroundColor: 'var(--border-color)', 
+                  borderRadius: '2px',
+                  overflow: 'hidden'
+                }}>
+                  <div style={{ 
+                    width: `${(usageCount / DAILY_LIMIT) * 100}%`, 
+                    height: '100%', 
+                    backgroundColor: usageCount >= DAILY_LIMIT ? '#ef4444' : 'var(--accent-primary)',
+                    transition: 'width 0.3s ease'
+                  }} />
+                </div>
+                <span>今日使用：{usageCount}/{DAILY_LIMIT} 次</span>
+              </div>
             </div>
 
             {/* AI Results */}
