@@ -107,7 +107,24 @@ export function Sidebar({ currentView, onViewChange, isMobile }: SidebarProps) {
       flexDirection: 'column',
       padding: '1.5rem 1rem'
     }}>
-      <div style={{ marginBottom: '2rem', paddingLeft: '0.75rem' }}>
+      <div 
+        onClick={() => onViewChange('inbox')}
+        style={{ 
+          marginBottom: '2rem', 
+          paddingLeft: '0.75rem',
+          cursor: 'pointer',
+          transition: 'var(--transition)',
+          borderRadius: 'var(--radius-md)',
+          marginLeft: '-0.5rem',
+          padding: '0.5rem'
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = 'var(--bg-surface-hover)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = 'transparent';
+        }}
+      >
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
           <svg
             width="20"
@@ -145,7 +162,7 @@ export function Sidebar({ currentView, onViewChange, isMobile }: SidebarProps) {
             SeedX
           </h1>
         </div>
-        <p className="text-muted" style={{ marginTop: '0.25rem' }}>One Seed, Infinite Echoes.</p>
+        <p className="text-muted" style={{ marginTop: '0.25rem', fontSize: '0.75rem' }}>One Seed, Infinite Echoes.</p>
       </div>
 
       <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
