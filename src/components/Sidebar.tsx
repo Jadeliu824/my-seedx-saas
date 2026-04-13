@@ -1,6 +1,7 @@
 import { Lightbulb, Edit3, Layers, BarChart3, LogOut, User } from 'lucide-react';
 import type { ViewState } from '../App';
 import { useAuth } from '../context/AuthContext';
+import { Link } from 'react-router-dom';
 
 interface SidebarProps {
   currentView: ViewState;
@@ -108,21 +109,12 @@ export function Sidebar({ currentView, onViewChange, isMobile }: SidebarProps) {
       padding: '1.5rem 1rem'
     }}>
       <div 
-        onClick={() => onViewChange('inbox')}
         style={{ 
           marginBottom: '2rem', 
           paddingLeft: '0.75rem',
-          cursor: 'pointer',
-          transition: 'var(--transition)',
           borderRadius: 'var(--radius-md)',
           marginLeft: '-0.5rem',
           padding: '0.5rem'
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.backgroundColor = 'var(--bg-surface-hover)';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.backgroundColor = 'transparent';
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
@@ -158,9 +150,21 @@ export function Sidebar({ currentView, onViewChange, isMobile }: SidebarProps) {
               strokeDasharray="0.3 0.8"
             />
           </svg>
-          <h1 style={{ fontSize: '1.25rem', fontWeight: 800 }}>
+          <Link 
+            to="/" 
+            style={{ 
+              fontSize: '1.25rem', 
+              fontWeight: 800, 
+              color: 'inherit', 
+              textDecoration: 'none',
+              cursor: 'pointer',
+              transition: 'var(--transition)'
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--accent-primary)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.color = 'inherit'; }}
+          >
             SeedX
-          </h1>
+          </Link>
         </div>
         <p className="text-muted" style={{ marginTop: '0.25rem', fontSize: '0.75rem' }}>One Seed, Infinite Echoes.</p>
       </div>
