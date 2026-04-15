@@ -2,16 +2,19 @@ import { useState, useEffect } from 'react';
 import { useWorkflow } from '../context/WorkflowContext';
 import { Sparkles, Copy, CheckCircle2, Trash2, X, Check } from 'lucide-react';
 
-export function DraftGenerator({ isMobile }: { isMobile?: boolean }) {
+export function DraftGenerator({ language, isMobile }: { language: 'CN' | 'EN'; isMobile?: boolean }) {
   const { drafts, ideas, updatePlatformDraft, deleteDraft } = useWorkflow();
   const [selectedDraftId, setSelectedDraftId] = useState<string | null>(null);
   
   // Local state for the generated results
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedResults, setGeneratedResults] = useState<{
-    xiaohongshu: string;
-    chineseTweet: string;
-    englishTweet: string;
+    xiaohongshu?: string;
+    chineseTweet?: string;
+    douyinScript?: string;
+    englishTweet?: string;
+    linkedinPost?: string;
+    youtubeScript?: string;
   } | null>(null);
   
   const [copiedSection, setCopiedSection] = useState<string | null>(null);
@@ -55,13 +58,19 @@ export function DraftGenerator({ isMobile }: { isMobile?: boolean }) {
     if (currentDraft && !isGenerating) {
       const xhs = currentDraft.drafts['xiaohongshu']?.content || '';
       const cnTweet = currentDraft.drafts['twitter_cn']?.content || '';
+      const douyin = currentDraft.drafts['douyin']?.content || '';
       const enTweet = currentDraft.drafts['twitter_en']?.content || '';
+      const linkedin = currentDraft.drafts['linkedin']?.content || '';
+      const youtube = currentDraft.drafts['youtube']?.content || '';
 
-      if (xhs || cnTweet || enTweet) {
+      if (xhs || cnTweet || douyin || enTweet || linkedin || youtube) {
         setGeneratedResults({
           xiaohongshu: xhs,
           chineseTweet: cnTweet,
-          englishTweet: enTweet
+          douyinScript: douyin,
+          englishTweet: enTweet,
+          linkedinPost: linkedin,
+          youtubeScript: youtube
         });
       } else {
         setGeneratedResults(null);
@@ -139,10 +148,13 @@ export function DraftGenerator({ isMobile }: { isMobile?: boolean }) {
 ### 任务详情
 选题："""${currentIdea.content}"""
 
-输出三个版本，版本间用「---」分隔：
+${language === 'CN' ? `输出三个版本，版本间用「---」分隔：
 1. **小红书笔记**：500字左右，自然分段，包含3个备选标题和5个标签。标题要克制，不要标题党。
 2. **中文推文**：1条，100字以内，说清一个核心观察/观点，说完就停。
-3. **英文推文 (English Insight)**：1条，100字以内。**这不是翻译**，是针对同一个选题，用英语母语者的直觉（Native Instinct）写下的随感，追求地道和呼吸感。
+3. **抖音视频脚本**：针对同一选题，提供一个适合短视频的文案脚本，长度控制在1分钟以内，包含画面视觉建议和口播文案。这是真人出镜风格。` : `输出三个英文版本（请基于英语母语者的直觉进行写下随感，追求地道自然，这不是生硬的翻译），版本间用「---」分隔：
+1. **英文推文 (Twitter/X)**：1条，不带标签，自然表达一个观察，一语中的。
+2. **LinkedIn 贴文**：专业但真诚的职场感悟，富有共鸣，字数150-200字，带有个人反思。
+3. **YouTube 短视频脚本**：包含 Hook（开场）、主体口播和画面建议的简短脚本大纲。`}
 
 直接输出内容，不要任何开场白或解释。`;
 
@@ -182,27 +194,37 @@ export function DraftGenerator({ isMobile }: { isMobile?: boolean }) {
       });
 
       // Ensure we have results, fallback to failed text if needed
-      const xiaohongshu = parts.length > 0 ? parts[0] : '生成失败';
-      const chineseTweet = parts.length > 1 ? parts[1] : '生成失败';
-      const englishTweet = parts.length > 2 ? parts[2] : '生成失败';
+      const part1 = parts.length > 0 ? parts[0] : '生成失败';
+      const part2 = parts.length > 1 ? parts[1] : '生成失败';
+      const part3 = parts.length > 2 ? parts[2] : '生成失败';
 
-      setGeneratedResults({
-        xiaohongshu,
-        chineseTweet,
-        englishTweet
-      });
+      if (language === 'CN') {
+        setGeneratedResults(prev => ({
+          ...prev,
+          xiaohongshu: part1,
+          chineseTweet: part2,
+          douyinScript: part3
+        }));
+      } else {
+        setGeneratedResults(prev => ({
+          ...prev,
+          englishTweet: part1,
+          linkedinPost: part2,
+          youtubeScript: part3
+        }));
+      }
 
       // Save all content back to context if draft still exists
       const draftExists = drafts.find(d => d.id === draftId);
       if (draftExists) {
-        if (xiaohongshu && xiaohongshu !== '生成失败') {
-          updatePlatformDraft(draftId, 'xiaohongshu', xiaohongshu);
-        }
-        if (chineseTweet && chineseTweet !== '生成失败') {
-          updatePlatformDraft(draftId, 'twitter_cn', chineseTweet);
-        }
-        if (englishTweet && englishTweet !== '生成失败') {
-          updatePlatformDraft(draftId, 'twitter_en', englishTweet);
+        if (language === 'CN') {
+          if (part1 && part1 !== '生成失败') updatePlatformDraft(draftId, 'xiaohongshu', part1);
+          if (part2 && part2 !== '生成失败') updatePlatformDraft(draftId, 'twitter_cn', part2);
+          if (part3 && part3 !== '生成失败') updatePlatformDraft(draftId, 'douyin', part3);
+        } else {
+          if (part1 && part1 !== '生成失败') updatePlatformDraft(draftId, 'twitter_en', part1);
+          if (part2 && part2 !== '生成失败') updatePlatformDraft(draftId, 'linkedin', part2);
+          if (part3 && part3 !== '生成失败') updatePlatformDraft(draftId, 'youtube', part3);
         }
         
         // Success: Increment usage
@@ -412,56 +434,122 @@ export function DraftGenerator({ isMobile }: { isMobile?: boolean }) {
             </div>
 
             {/* AI Results */}
-            {generatedResults && (
+            {generatedResults && language === 'CN' && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
                 {/* 小红书笔记 */}
-                <div style={{ border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', borderBottom: '1px solid var(--border-color)', backgroundColor: 'var(--bg-surface-hover)' }}>
-                    <h4 style={{ fontWeight: 600 }}>小红书笔记</h4>
-                    <button
-                      onClick={() => copyToClipboard(generatedResults.xiaohongshu, 'xiaohongshu')}
-                      style={{ color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.875rem' }}
-                    >
-                      {copiedSection === 'xiaohongshu' ? <><CheckCircle2 size={16} color="#10b981"/> 已复制</> : <><Copy size={16} /> 复制</>}
-                    </button>
+                {generatedResults.xiaohongshu && (
+                  <div style={{ border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', borderBottom: '1px solid var(--border-color)', backgroundColor: 'var(--bg-surface-hover)' }}>
+                      <h4 style={{ fontWeight: 600 }}>小红书笔记</h4>
+                      <button
+                        onClick={() => copyToClipboard(generatedResults.xiaohongshu!, 'xiaohongshu')}
+                        style={{ color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.875rem' }}
+                      >
+                        {copiedSection === 'xiaohongshu' ? <><CheckCircle2 size={16} color="#10b981"/> 已复制</> : <><Copy size={16} /> 复制</>}
+                      </button>
+                    </div>
+                    <div style={{ padding: '1rem', whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>
+                      {generatedResults.xiaohongshu}
+                    </div>
                   </div>
-                  <div style={{ padding: '1rem', whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>
-                    {generatedResults.xiaohongshu}
-                  </div>
-                </div>
+                )}
 
-                {/* 中文推文串 */}
-                <div style={{ border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', borderBottom: '1px solid var(--border-color)', backgroundColor: 'var(--bg-surface-hover)' }}>
-                    <h4 style={{ fontWeight: 600 }}>中文推文串</h4>
-                    <button
-                      onClick={() => copyToClipboard(generatedResults.chineseTweet, 'chineseTweet')}
-                      style={{ color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.875rem' }}
-                    >
-                      {copiedSection === 'chineseTweet' ? <><CheckCircle2 size={16} color="#10b981"/> 已复制</> : <><Copy size={16} /> 复制</>}
-                    </button>
+                {/* 中文推文/短片 */}
+                {generatedResults.chineseTweet && (
+                  <div style={{ border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', borderBottom: '1px solid var(--border-color)', backgroundColor: 'var(--bg-surface-hover)' }}>
+                      <h4 style={{ fontWeight: 600 }}>中文推文</h4>
+                      <button
+                        onClick={() => copyToClipboard(generatedResults.chineseTweet!, 'chineseTweet')}
+                        style={{ color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.875rem' }}
+                      >
+                        {copiedSection === 'chineseTweet' ? <><CheckCircle2 size={16} color="#10b981"/> 已复制</> : <><Copy size={16} /> 复制</>}
+                      </button>
+                    </div>
+                    <div style={{ padding: '1rem', whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>
+                      {generatedResults.chineseTweet}
+                    </div>
                   </div>
-                  <div style={{ padding: '1rem', whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>
-                    {generatedResults.chineseTweet}
-                  </div>
-                </div>
+                )}
 
-                {/* 英文推文串 */}
-                <div style={{ border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', borderBottom: '1px solid var(--border-color)', backgroundColor: 'var(--bg-surface-hover)' }}>
-                    <h4 style={{ fontWeight: 600 }}>英文推文串</h4>
-                    <button
-                      onClick={() => copyToClipboard(generatedResults.englishTweet, 'englishTweet')}
-                      style={{ color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.875rem' }}
-                    >
-                      {copiedSection === 'englishTweet' ? <><CheckCircle2 size={16} color="#10b981"/> 已复制</> : <><Copy size={16} /> 复制</>}
-                    </button>
+                {/* 抖音视频脚本 */}
+                {generatedResults.douyinScript && (
+                  <div style={{ border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', borderBottom: '1px solid var(--border-color)', backgroundColor: 'var(--bg-surface-hover)' }}>
+                      <h4 style={{ fontWeight: 600 }}>抖音视频脚本</h4>
+                      <button
+                        onClick={() => copyToClipboard(generatedResults.douyinScript!, 'douyinScript')}
+                        style={{ color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.875rem' }}
+                      >
+                        {copiedSection === 'douyinScript' ? <><CheckCircle2 size={16} color="#10b981"/> 已复制</> : <><Copy size={16} /> 复制</>}
+                      </button>
+                    </div>
+                    <div style={{ padding: '1rem', whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>
+                      {generatedResults.douyinScript}
+                    </div>
                   </div>
-                  <div style={{ padding: '1rem', whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>
-                    {generatedResults.englishTweet}
+                )}
+
+              </div>
+            )}
+
+            {generatedResults && language === 'EN' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+
+                {/* 英文推文 */}
+                {generatedResults.englishTweet && (
+                  <div style={{ border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', borderBottom: '1px solid var(--border-color)', backgroundColor: 'var(--bg-surface-hover)' }}>
+                      <h4 style={{ fontWeight: 600 }}>Twitter Post</h4>
+                      <button
+                        onClick={() => copyToClipboard(generatedResults.englishTweet!, 'englishTweet')}
+                        style={{ color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.875rem' }}
+                      >
+                        {copiedSection === 'englishTweet' ? <><CheckCircle2 size={16} color="#10b981"/> 已复制</> : <><Copy size={16} /> 复制</>}
+                      </button>
+                    </div>
+                    <div style={{ padding: '1rem', whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>
+                      {generatedResults.englishTweet}
+                    </div>
                   </div>
-                </div>
+                )}
+
+                {/* LinkedIn 推文 */}
+                {generatedResults.linkedinPost && (
+                  <div style={{ border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', borderBottom: '1px solid var(--border-color)', backgroundColor: 'var(--bg-surface-hover)' }}>
+                      <h4 style={{ fontWeight: 600 }}>LinkedIn Post</h4>
+                      <button
+                        onClick={() => copyToClipboard(generatedResults.linkedinPost!, 'linkedinPost')}
+                        style={{ color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.875rem' }}
+                      >
+                        {copiedSection === 'linkedinPost' ? <><CheckCircle2 size={16} color="#10b981"/> 已复制</> : <><Copy size={16} /> 复制</>}
+                      </button>
+                    </div>
+                    <div style={{ padding: '1rem', whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>
+                      {generatedResults.linkedinPost}
+                    </div>
+                  </div>
+                )}
+
+                {/* YouTube 脚本 */}
+                {generatedResults.youtubeScript && (
+                  <div style={{ border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', borderBottom: '1px solid var(--border-color)', backgroundColor: 'var(--bg-surface-hover)' }}>
+                      <h4 style={{ fontWeight: 600 }}>YouTube Script</h4>
+                      <button
+                        onClick={() => copyToClipboard(generatedResults.youtubeScript!, 'youtubeScript')}
+                        style={{ color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.875rem' }}
+                      >
+                        {copiedSection === 'youtubeScript' ? <><CheckCircle2 size={16} color="#10b981"/> 已复制</> : <><Copy size={16} /> 复制</>}
+                      </button>
+                    </div>
+                    <div style={{ padding: '1rem', whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>
+                      {generatedResults.youtubeScript}
+                    </div>
+                  </div>
+                )}
 
               </div>
             )}
