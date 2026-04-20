@@ -440,7 +440,6 @@ ${language === 'CN' ? `输出三个版本，版本间用「---」分隔：
             {generatedResults && language === 'CN' && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
-                {/* 小红书笔记 */}
                 {generatedResults.xiaohongshu && (
                   <div style={{ border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', borderBottom: '1px solid var(--border-color)', backgroundColor: 'var(--bg-surface-hover)' }}>
@@ -458,7 +457,6 @@ ${language === 'CN' ? `输出三个版本，版本间用「---」分隔：
                   </div>
                 )}
 
-                {/* 中文推文/短片 */}
                 {generatedResults.chineseTweet && (
                   <div style={{ border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', borderBottom: '1px solid var(--border-color)', backgroundColor: 'var(--bg-surface-hover)' }}>
@@ -476,7 +474,6 @@ ${language === 'CN' ? `输出三个版本，版本间用「---」分隔：
                   </div>
                 )}
 
-                {/* 抖音视频脚本 */}
                 {generatedResults.douyinScript && (
                   <div style={{ border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', borderBottom: '1px solid var(--border-color)', backgroundColor: 'var(--bg-surface-hover)' }}>
@@ -500,7 +497,6 @@ ${language === 'CN' ? `输出三个版本，版本间用「---」分隔：
             {generatedResults && language === 'EN' && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
-                {/* 英文推文 */}
                 {generatedResults.englishTweet && (
                   <div style={{ border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', borderBottom: '1px solid var(--border-color)', backgroundColor: 'var(--bg-surface-hover)' }}>
@@ -518,7 +514,6 @@ ${language === 'CN' ? `输出三个版本，版本间用「---」分隔：
                   </div>
                 )}
 
-                {/* LinkedIn 推文 */}
                 {generatedResults.linkedinPost && (
                   <div style={{ border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', borderBottom: '1px solid var(--border-color)', backgroundColor: 'var(--bg-surface-hover)' }}>
@@ -536,7 +531,6 @@ ${language === 'CN' ? `输出三个版本，版本间用「---」分隔：
                   </div>
                 )}
 
-                {/* YouTube 脚本 */}
                 {generatedResults.youtubeScript && (
                   <div style={{ border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', borderBottom: '1px solid var(--border-color)', backgroundColor: 'var(--bg-surface-hover)' }}>
