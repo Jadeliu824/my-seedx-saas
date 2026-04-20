@@ -2,21 +2,24 @@ import { Lightbulb, Edit3, Layers, BarChart3, LogOut, User } from 'lucide-react'
 import type { ViewState } from '../App';
 import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
+import { translations, type Language } from '../i18n/translations';
 
 interface SidebarProps {
   currentView: ViewState;
   onViewChange: (view: ViewState) => void;
+  language?: Language;
   isMobile?: boolean;
 }
 
-export function Sidebar({ currentView, onViewChange, isMobile }: SidebarProps) {
+export function Sidebar({ currentView, onViewChange, language = 'CN', isMobile }: SidebarProps) {
   const { user, loginWithGoogle, logout } = useAuth();
+  const t = translations[language];
 
   const navItems: { id: ViewState; label: string; icon: React.ElementType }[] = [
-    { id: 'inbox', label: '记录', icon: Lightbulb },
-    { id: 'drafts', label: '深化', icon: Edit3 },
-    { id: 'materials', label: '素材', icon: Layers },
-    { id: 'analytics', label: '复盘', icon: BarChart3 },
+    { id: 'inbox', label: t.sidebar.inbox, icon: Lightbulb },
+    { id: 'drafts', label: t.sidebar.drafts, icon: Edit3 },
+    { id: 'materials', label: t.sidebar.materials, icon: Layers },
+    { id: 'analytics', label: t.sidebar.analytics, icon: BarChart3 },
   ];
 
   if (isMobile) {
@@ -77,7 +80,7 @@ export function Sidebar({ currentView, onViewChange, isMobile }: SidebarProps) {
               onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none' }}
             />
             {!user.photoURL && <User size={20} />}
-            <span style={{ fontSize: '0.625rem' }}>退出</span>
+            <span style={{ fontSize: '0.625rem' }}>{t.sidebar.logout}</span>
           </button>
         ) : (
           <button 
@@ -92,7 +95,7 @@ export function Sidebar({ currentView, onViewChange, isMobile }: SidebarProps) {
             }}
           >
             <User size={20} />
-            <span style={{ fontSize: '0.625rem' }}>登录</span>
+            <span style={{ fontSize: '0.625rem' }}>{t.sidebar.login}</span>
           </button>
         )}
       </nav>
@@ -166,14 +169,17 @@ export function Sidebar({ currentView, onViewChange, isMobile }: SidebarProps) {
             SeedX
           </Link>
         </div>
-        <p className="text-muted" style={{ marginTop: '0.25rem', fontSize: '0.75rem' }}>One Seed, Infinite Echoes.</p>
+        <p className="text-muted" style={{ marginTop: '0.25rem', fontSize: '0.75rem' }}>{t.sidebar.tagline}</p>
       </div>
 
       <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
         {navItems.map(item => {
           const Icon = item.icon;
           const isActive = currentView === item.id;
-          const fullLabel = item.id === 'inbox' ? '选题记录' : item.id === 'drafts' ? '待深化选题' : item.id === 'materials' ? '内容素材库' : '数据复盘';
+          const fullLabel = item.id === 'inbox' ? t.sidebar.ideaInbox :
+                            item.id === 'drafts' ? t.sidebar.draftGenerator :
+                            item.id === 'materials' ? t.sidebar.materialLibrary :
+                            t.sidebar.dataAnalytics;
           return (
             <button
               key={item.id}
@@ -215,7 +221,7 @@ export function Sidebar({ currentView, onViewChange, isMobile }: SidebarProps) {
             />
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontSize: '0.875rem', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {user.displayName || '用户'}
+                {user.displayName || t.sidebar.user}
               </div>
               <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {user.email}
@@ -224,7 +230,7 @@ export function Sidebar({ currentView, onViewChange, isMobile }: SidebarProps) {
             <button
               id="sidebar-logout-btn"
               onClick={logout}
-              title="退出登录"
+              title={t.sidebar.logout}
               style={{
                 padding: '0.375rem',
                 borderRadius: 'var(--radius-sm)',
@@ -266,10 +272,11 @@ export function Sidebar({ currentView, onViewChange, isMobile }: SidebarProps) {
             onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'var(--accent-primary)'; }}
           >
             <User size={16} />
-            使用 Google 登录
+            {t.sidebar.continueWithGoogle}
           </button>
         )}
       </div>
     </aside>
   );
 }
+

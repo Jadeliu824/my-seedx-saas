@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { useWorkflow } from '../context/WorkflowContext';
 import { BookOpen, Quote, Target, Lightbulb, Plus, Trash2, X, Check } from 'lucide-react';
+import { translations } from '../i18n/translations';
 import type { MaterialType } from '../types';
 
-export function MaterialLibrary({ isMobile }: { isMobile?: boolean }) {
+export function MaterialLibrary({ language = 'CN', isMobile }: { language?: 'CN' | 'EN', isMobile?: boolean }) {
+  const t = translations[language];
   const { materials, addMaterial, deleteMaterial } = useWorkflow();
   const [activeTab, setActiveTab] = useState('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -16,11 +18,11 @@ export function MaterialLibrary({ isMobile }: { isMobile?: boolean }) {
   });
 
   const tabs = [
-    { id: 'all', label: '全部素材' },
-    { id: 'core_concept', label: '核心概念库', icon: BookOpen },
-    { id: 'golden_quote', label: '金句库', icon: Quote },
-    { id: 'published_note', label: '爆款文稿库', icon: Target },
-    { id: 'methodology', label: '方法论沉淀', icon: Lightbulb },
+    { id: 'all', label: t.materials.tabs.all },
+    { id: 'core_concept', label: t.materials.tabs.core_concept, icon: BookOpen },
+    { id: 'golden_quote', label: t.materials.tabs.golden_quote, icon: Quote },
+    { id: 'published_note', label: t.materials.tabs.published_note, icon: Target },
+    { id: 'methodology', label: t.materials.tabs.methodology, icon: Lightbulb },
   ];
 
   const filteredMaterials = activeTab === 'all' 
@@ -30,7 +32,7 @@ export function MaterialLibrary({ isMobile }: { isMobile?: boolean }) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.title || !formData.content) {
-      alert('请填写标题和内容');
+      alert(t.materials.fillRequired);
       return;
     }
     addMaterial({
@@ -47,8 +49,8 @@ export function MaterialLibrary({ isMobile }: { isMobile?: boolean }) {
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', position: 'relative' }}>
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: isMobile ? 'flex-start' : 'center', marginBottom: '2rem', flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? '1rem' : '0' }}>
         <div>
-          <h2 style={{ fontSize: '1.875rem', fontWeight: 700 }}>内容素材库</h2>
-          <p className="text-muted" style={{ marginTop: '0.5rem' }}>从碰运气到系统化，你的创作地基。</p>
+          <h2 style={{ fontSize: '1.875rem', fontWeight: 700 }}>{t.materials.title}</h2>
+          <p className="text-muted" style={{ marginTop: '0.5rem' }}>{t.materials.subtitle}</p>
         </div>
         <button
           onClick={() => {
@@ -62,7 +64,7 @@ export function MaterialLibrary({ isMobile }: { isMobile?: boolean }) {
           }}
         >
           <Plus size={18} />
-          添加素材
+          {t.materials.addMaterial}
         </button>
       </header>
 
@@ -83,10 +85,10 @@ export function MaterialLibrary({ isMobile }: { isMobile?: boolean }) {
           padding: '1rem'
         }}>
           <div className="glass-panel" style={{ width: '100%', maxWidth: '500px', padding: '2rem', position: 'relative' }}>
-            <h3 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '1.5rem' }}>添加新素材</h3>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '1.5rem' }}>{t.materials.addNew}</h3>
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '0.875rem', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>素材类型</label>
+                <label style={{ display: 'block', fontSize: '0.875rem', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>{t.materials.type}</label>
                 <select 
                   value={formData.type}
                   onChange={(e) => setFormData({...formData, type: e.target.value as MaterialType})}
@@ -98,30 +100,30 @@ export function MaterialLibrary({ isMobile }: { isMobile?: boolean }) {
                 </select>
               </div>
               <div>
-                <label style={{ display: 'block', fontSize: '0.875rem', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>标题</label>
-                <input 
-                  type="text" 
-                  placeholder="输入素材标题..."
+                <label style={{ display: 'block', fontSize: '0.875rem', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>{t.materials.titleField}</label>
+                <input
+                  type="text"
+                  placeholder={t.materials.titleField + '...'}
                   value={formData.title}
                   onChange={(e) => setFormData({...formData, title: e.target.value})}
                   style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
                 />
               </div>
               <div>
-                <label style={{ display: 'block', fontSize: '0.875rem', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>内容</label>
-                <textarea 
+                <label style={{ display: 'block', fontSize: '0.875rem', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>{t.materials.content}</label>
+                <textarea
                   rows={5}
-                  placeholder="输入素材内容..."
+                  placeholder={t.materials.content + '...'}
                   value={formData.content}
                   onChange={(e) => setFormData({...formData, content: e.target.value})}
                   style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', resize: 'vertical' }}
                 />
               </div>
               <div>
-                <label style={{ display: 'block', fontSize: '0.875rem', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>标签 (用逗号分隔)</label>
-                <input 
-                  type="text" 
-                  placeholder="如: 效率, 极简, 认知"
+                <label style={{ display: 'block', fontSize: '0.875rem', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>{t.materials.tags}</label>
+                <input
+                  type="text"
+                  placeholder={t.materials.tagsPlaceholder}
                   value={formData.tags}
                   onChange={(e) => setFormData({...formData, tags: e.target.value})}
                   style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
@@ -129,10 +131,10 @@ export function MaterialLibrary({ isMobile }: { isMobile?: boolean }) {
               </div>
               <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
                 <button type="button" onClick={() => setIsModalOpen(false)} style={{ flex: 1, padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', color: 'var(--text-secondary)' }}>
-                  取消
+                  {t.common.cancel}
                 </button>
                 <button type="submit" className="btn-primary" style={{ flex: 1 }}>
-                  保存素材
+                  {t.materials.saveMaterial}
                 </button>
               </div>
             </form>
@@ -176,7 +178,7 @@ export function MaterialLibrary({ isMobile }: { isMobile?: boolean }) {
           <div key={mat.id} className="glass-panel" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span className="text-muted" style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                {tabs.find(t => t.id === mat.type)?.label.replace('库', '')}
+                {tabs.find(t => t.id === mat.type)?.label}
               </span>
               {mat.tags && mat.tags.length > 0 && (
                 <div style={{ display: 'flex', gap: '0.25rem' }}>
@@ -207,7 +209,7 @@ export function MaterialLibrary({ isMobile }: { isMobile?: boolean }) {
                       border: 'none',
                       cursor: 'pointer'
                     }}
-                    title="确认删除"
+                    title={t.common.confirm}
                   >
                     <Check size={16} />
                   </button>
@@ -224,7 +226,7 @@ export function MaterialLibrary({ isMobile }: { isMobile?: boolean }) {
                       border: 'none',
                       cursor: 'pointer'
                     }}
-                    title="取消"
+                    title={t.common.cancel}
                   >
                     <X size={16} />
                   </button>
@@ -256,7 +258,7 @@ export function MaterialLibrary({ isMobile }: { isMobile?: boolean }) {
                     e.currentTarget.style.color = 'var(--text-secondary)';
                     e.currentTarget.style.backgroundColor = 'transparent';
                   }}
-                  title="删除素材"
+                  title={t.materials.deleteMaterial}
                 >
                   <Trash2 size={16} />
                 </button>
@@ -270,7 +272,7 @@ export function MaterialLibrary({ isMobile }: { isMobile?: boolean }) {
         ))}
         {filteredMaterials.length === 0 && (
           <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '4rem', color: 'var(--text-secondary)' }}>
-            没有找到相关素材
+            {t.materials.noMaterials}
           </div>
         )}
       </div>

@@ -6,6 +6,7 @@ import {
   type User,
 } from 'firebase/auth';
 import { auth, googleProvider } from '../lib/firebase';
+import { translations } from '../i18n/translations';
 
 interface AuthContextType {
   user: User | null;
@@ -34,12 +35,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (error: unknown) {
       console.error('Login error:', error);
       const err = error as { code?: string; message?: string };
+      const language = localStorage.getItem('seedx_language') === 'EN' ? 'EN' : 'CN';
+      const t = translations[language];
       if (err.code === 'auth/unauthorized-domain') {
-        alert('登录失败：当前域名未在 Firebase 中授权。请在 Firebase 控制台添加该域名。');
+        alert(t.auth.loginFailedDomain);
       } else if (err.code === 'auth/popup-blocked') {
-        alert('登录失败：弹窗被浏览器拦截，请允许弹窗后重试。');
+        alert(t.auth.loginFailedPopup);
       } else {
-        alert(`登录出错: ${err.message || '未知错误'}`);
+        alert(t.auth.loginError(err.message || t.auth.unknownError));
       }
     }
   };

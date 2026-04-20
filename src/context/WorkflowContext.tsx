@@ -35,7 +35,7 @@ interface WorkflowContextType {
 const WorkflowContext = createContext<WorkflowContextType | undefined>(undefined);
 
 // Seed materials for new users
-const SEED_MATERIALS: Omit<Material, 'id'>[] = [
+const SEED_MATERIALS_CN: Omit<Material, 'id'>[] = [
   {
     type: 'core_concept',
     title: '生产型兴趣 (Productive Interest)',
@@ -52,6 +52,26 @@ const SEED_MATERIALS: Omit<Material, 'id'>[] = [
     type: 'methodology',
     title: '小红书标题方法论',
     content: '制造悬念 + 明确收益 + 痛点共鸣。生成3个标题选项供选择。',
+  },
+];
+
+const SEED_MATERIALS_EN: Omit<Material, 'id'>[] = [
+  {
+    type: 'core_concept',
+    title: 'Productive Interest',
+    content: 'Don\'t just be a consumer, be a producer. Transform your interests into products or content that can be output and create value.',
+    tags: ['thinking', 'productivity'],
+  },
+  {
+    type: 'golden_quote',
+    title: 'Reinventing the wheel',
+    content: 'This avoids reinventing the wheel and ensures consistency in content.',
+    tags: ['systematization', 'efficiency'],
+  },
+  {
+    type: 'methodology',
+    title: 'RED Note Title Methodology',
+    content: 'Create suspense + clarify benefits + resonate with pain points. Generate 3 title options for selection.',
   },
 ];
 
@@ -106,7 +126,9 @@ export function WorkflowProvider({ children }: { children: React.ReactNode }) {
         if (!seededRef.current && list.length === 0) {
           seededRef.current = true;
           const batch = writeBatch(db);
-          SEED_MATERIALS.forEach((m) => {
+          const isEN = localStorage.getItem('seedx_language') === 'EN';
+          const seedMaterials = isEN ? SEED_MATERIALS_EN : SEED_MATERIALS_CN;
+          seedMaterials.forEach((m) => {
             const ref = doc(col('materials'));
             batch.set(ref, { ...m });
           });
@@ -153,7 +175,8 @@ export function WorkflowProvider({ children }: { children: React.ReactNode }) {
       console.log('Idea saved successfully:', id);
     } catch (err) {
       console.error('Failed to add idea:', err);
-      alert('想法保存失败，请检查网络连接或登录状态。');
+      const isEN = localStorage.getItem('seedx_language') === 'EN';
+      alert(isEN ? 'Failed to save idea, please check network connection or login status.' : '想法保存失败，请检查网络连接或登录状态。');
       // Revert optimistic update
       setIdeas((prev) => prev.filter(i => i.id !== id));
     }

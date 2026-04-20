@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
+import { translations } from '../i18n/translations';
 
 interface WaitlistEntry {
   id: string;
@@ -11,6 +12,8 @@ interface WaitlistEntry {
 export function AdminView() {
   const [waitlist, setWaitlist] = useState<WaitlistEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const isEN = localStorage.getItem('seedx_language') === 'EN';
+  const t = isEN ? translations.EN : translations.CN;
 
   useEffect(() => {
     async function fetchWaitlist() {
@@ -30,17 +33,17 @@ export function AdminView() {
     fetchWaitlist();
   }, []);
 
-  if (loading) return <div style={{ padding: '2rem' }}>加载中...</div>;
+  if (loading) return <div style={{ padding: '2rem' }}>{t.common.loading}</div>;
 
   return (
     <div style={{ maxWidth: '800px', margin: '3rem auto', padding: '0 1rem' }}>
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
         <div>
-          <h1 style={{ fontSize: '2rem', fontWeight: 800 }}>SeedX Admin</h1>
-          <p className="text-muted">Waitlist Entries</p>
+          <h1 style={{ fontSize: '2rem', fontWeight: 800 }}>{t.admin.title}</h1>
+          <p className="text-muted">{t.admin.waitlistEntries}</p>
         </div>
         <div style={{ fontSize: '1.5rem', fontWeight: 700 }}>
-          总计: {waitlist.length} 人
+          {t.admin.total(waitlist.length)}
         </div>
       </header>
       
@@ -48,16 +51,16 @@ export function AdminView() {
         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
           <thead style={{ backgroundColor: 'var(--bg-surface-hover)' }}>
             <tr>
-              <th style={{ padding: '1rem', borderBottom: '1px solid var(--border-color)' }}>姓名</th>
-              <th style={{ padding: '1rem', borderBottom: '1px solid var(--border-color)' }}>邮箱</th>
-              <th style={{ padding: '1rem', borderBottom: '1px solid var(--border-color)' }}>加入时间</th>
+              <th style={{ padding: '1rem', borderBottom: '1px solid var(--border-color)' }}>{t.admin.name}</th>
+              <th style={{ padding: '1rem', borderBottom: '1px solid var(--border-color)' }}>{t.admin.email}</th>
+              <th style={{ padding: '1rem', borderBottom: '1px solid var(--border-color)' }}>{t.admin.joinedAt}</th>
             </tr>
           </thead>
           <tbody>
             {waitlist.length === 0 ? (
               <tr>
                 <td colSpan={3} style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
-                  暂时没有人加入等待列表
+                  {t.admin.noEntries}
                 </td>
               </tr>
             ) : (
@@ -66,7 +69,7 @@ export function AdminView() {
                   <td style={{ padding: '1rem' }}>{entry.name || '-'}</td>
                   <td style={{ padding: '1rem' }}>{entry.email}</td>
                   <td style={{ padding: '1rem', color: 'var(--text-secondary)' }}>
-                    {new Date(entry.created_at).toLocaleString('zh-CN')}
+                    {new Date(entry.created_at).toLocaleString(isEN ? 'en-US' : 'zh-CN')}
                   </td>
                 </tr>
               ))

@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useWorkflow } from '../context/WorkflowContext';
 import { Sparkles, Copy, CheckCircle2, Trash2, X, Check } from 'lucide-react';
+import { translations, type Language } from '../i18n/translations';
 
-export function DraftGenerator({ language, isMobile }: { language: 'CN' | 'EN'; isMobile?: boolean }) {
+export function DraftGenerator({ language = 'CN', isMobile }: { language?: Language; isMobile?: boolean }) {
+  const t = translations[language];
+  const isEN = language === 'EN';
   const { drafts, ideas, updatePlatformDraft, deleteDraft } = useWorkflow();
   const [selectedDraftId, setSelectedDraftId] = useState<string | null>(null);
   
@@ -86,14 +89,14 @@ export function DraftGenerator({ language, isMobile }: { language: 'CN' | 'EN'; 
     
     // Check usage limit
     if (usageCount >= DAILY_LIMIT) {
-      alert("今日 3 次 AI 深化额度已用完，请明天再试。");
+      alert(t.drafts.limitAlert);
       return;
     }
 
     const draftId = currentDraft.id;
     
     if (!import.meta.env.VITE_DEEPSEEK_API_KEY) {
-      alert("请在 .env.local 中配置 VITE_DEEPSEEK_API_KEY");
+      alert(t.drafts.apiKeyMissing);
       return;
     }
 
@@ -174,7 +177,7 @@ ${language === 'CN' ? `输出三个版本，版本间用「---」分隔：
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(`API 请求失败 (状态码: ${response.status}): ${errorData.error?.message || response.statusText}`);
+        throw new Error(isEN ? `API request failed (status code: ${response.status}): ${errorData.error?.message || response.statusText}` : `API 请求失败 (状态码: ${response.status}): ${errorData.error?.message || response.statusText}`);
       }
 
       const data = await response.json();
@@ -194,9 +197,9 @@ ${language === 'CN' ? `输出三个版本，版本间用「---」分隔：
       });
 
       // Ensure we have results, fallback to failed text if needed
-      const part1 = parts.length > 0 ? parts[0] : '生成失败';
-      const part2 = parts.length > 1 ? parts[1] : '生成失败';
-      const part3 = parts.length > 2 ? parts[2] : '生成失败';
+      const part1 = parts.length > 0 ? parts[0] : t.drafts.generationFailed;
+      const part2 = parts.length > 1 ? parts[1] : t.drafts.generationFailed;
+      const part3 = parts.length > 2 ? parts[2] : t.drafts.generationFailed;
 
       if (language === 'CN') {
         setGeneratedResults(prev => ({
@@ -218,13 +221,13 @@ ${language === 'CN' ? `输出三个版本，版本间用「---」分隔：
       const draftExists = drafts.find(d => d.id === draftId);
       if (draftExists) {
         if (language === 'CN') {
-          if (part1 && part1 !== '生成失败') updatePlatformDraft(draftId, 'xiaohongshu', part1);
-          if (part2 && part2 !== '生成失败') updatePlatformDraft(draftId, 'twitter_cn', part2);
-          if (part3 && part3 !== '生成失败') updatePlatformDraft(draftId, 'douyin', part3);
+          if (part1 && part1 !== t.drafts.generationFailed) updatePlatformDraft(draftId, 'xiaohongshu', part1);
+          if (part2 && part2 !== t.drafts.generationFailed) updatePlatformDraft(draftId, 'twitter_cn', part2);
+          if (part3 && part3 !== t.drafts.generationFailed) updatePlatformDraft(draftId, 'douyin', part3);
         } else {
-          if (part1 && part1 !== '生成失败') updatePlatformDraft(draftId, 'twitter_en', part1);
-          if (part2 && part2 !== '生成失败') updatePlatformDraft(draftId, 'linkedin', part2);
-          if (part3 && part3 !== '生成失败') updatePlatformDraft(draftId, 'youtube', part3);
+          if (part1 && part1 !== t.drafts.generationFailed) updatePlatformDraft(draftId, 'twitter_en', part1);
+          if (part2 && part2 !== t.drafts.generationFailed) updatePlatformDraft(draftId, 'linkedin', part2);
+          if (part3 && part3 !== t.drafts.generationFailed) updatePlatformDraft(draftId, 'youtube', part3);
         }
         
         // Success: Increment usage
@@ -239,7 +242,7 @@ ${language === 'CN' ? `输出三个版本，版本间用「---」分隔：
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
       console.error('AI Generation Error:', err);
-      alert(`生成失败: ${message || "请检查网络连接或 API Key"}`);
+      alert(t.drafts.generationFailed + ': ' + (message || t.drafts.checkNetwork));
     } finally {
       setIsGenerating(false);
     }
@@ -265,13 +268,13 @@ ${language === 'CN' ? `输出三个版本，版本间用「---」分隔：
         paddingBottom: isMobile ? '1rem' : '0'
       }}>
         <div style={{ paddingBottom: '1rem', borderBottom: '1px solid var(--border-color)' }}>
-          <h2 style={{ fontSize: '1.25rem', fontWeight: 600 }}>待深化选题</h2>
-          <p className="text-muted" style={{ fontSize: '0.875rem' }}>共有 {drafts.length} 个草稿</p>
+          <h2 style={{ fontSize: '1.25rem', fontWeight: 600 }}>{t.drafts.title}</h2>
+          <p className="text-muted" style={{ fontSize: '0.875rem' }}>{t.drafts.totalDrafts(drafts.length)}</p>
         </div>
         
         <div style={{ overflowY: 'auto', flex: 1 }}>
           {drafts.length === 0 ? (
-            <p className="text-muted" style={{ textAlign: 'center', marginTop: '2rem' }}>暂无草稿</p>
+            <p className="text-muted" style={{ textAlign: 'center', marginTop: '2rem' }}>{t.drafts.noDrafts}</p>
           ) : (
             drafts.map(draft => (
               <div 
@@ -301,7 +304,7 @@ ${language === 'CN' ? `输出三个版本，版本间用「---」分隔：
                     textOverflow: 'ellipsis',
                     whiteSpace: 'nowrap'
                   }}>
-                    {draft.title || '无标题'}
+                    {draft.title || t.common.untitled}
                   </h4>
                   <p className="text-muted" style={{ fontSize: '0.75rem' }}>
                     {new Date(draft.createdAt).toLocaleDateString()}
@@ -326,7 +329,7 @@ ${language === 'CN' ? `输出三个版本，版本间用「---」分隔：
                         border: 'none',
                         cursor: 'pointer'
                       }}
-                      title="确认删除"
+                      title={t.drafts.confirmDelete}
                     >
                       <Check size={16} />
                     </button>
@@ -343,7 +346,7 @@ ${language === 'CN' ? `输出三个版本，版本间用「---」分隔：
                         border: 'none',
                         cursor: 'pointer'
                       }}
-                      title="取消"
+                      title={t.common.cancel}
                     >
                       <X size={16} />
                     </button>
@@ -375,7 +378,7 @@ ${language === 'CN' ? `输出三个版本，版本间用「---」分隔：
                       e.currentTarget.style.color = 'var(--text-secondary)';
                       e.currentTarget.style.backgroundColor = 'transparent';
                     }}
-                    title="删除草稿"
+                    title={t.drafts.deleteDraft}
                   >
                     <Trash2 size={16} />
                   </button>
@@ -393,9 +396,9 @@ ${language === 'CN' ? `输出三个版本，版本间用「---」分隔：
             
             {/* Original Idea */}
             <section style={{ padding: '1.5rem', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', backgroundColor: 'var(--bg-surface-hover)' }}>
-              <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>原始想法</h3>
+              <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>{t.drafts.originalIdea}</h3>
               <p style={{ whiteSpace: 'pre-wrap', fontSize: '1.125rem' }}>
-                {currentIdea ? currentIdea.content : '无法找到原始想法内容'}
+                {currentIdea ? currentIdea.content : t.drafts.unableToFindOriginalIdea}
               </p>
             </section>
 
@@ -411,7 +414,7 @@ ${language === 'CN' ? `输出三个版本，版本间用「---」分隔：
                 }}
               >
                 <Sparkles size={18} />
-                {isGenerating ? 'AI 正在深度思考...' : usageCount >= DAILY_LIMIT ? '今日次数已用完' : 'AI 深化'}
+                {isGenerating ? t.drafts.aiThinking : usageCount >= DAILY_LIMIT ? t.drafts.dailyLimitReached : t.drafts.aiExpand}
               </button>
               
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-muted)', fontSize: '0.75rem' }}>
@@ -429,7 +432,7 @@ ${language === 'CN' ? `输出三个版本，版本间用「---」分隔：
                     transition: 'width 0.3s ease'
                   }} />
                 </div>
-                <span>今日使用：{usageCount}/{DAILY_LIMIT} 次</span>
+                <span>{t.drafts.usageLimit(usageCount, DAILY_LIMIT)}</span>
               </div>
             </div>
 
@@ -441,12 +444,12 @@ ${language === 'CN' ? `输出三个版本，版本间用「---」分隔：
                 {generatedResults.xiaohongshu && (
                   <div style={{ border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', borderBottom: '1px solid var(--border-color)', backgroundColor: 'var(--bg-surface-hover)' }}>
-                      <h4 style={{ fontWeight: 600 }}>小红书笔记</h4>
+                      <h4 style={{ fontWeight: 600 }}>{t.drafts.platforms.xiaohongshu}</h4>
                       <button
                         onClick={() => copyToClipboard(generatedResults.xiaohongshu!, 'xiaohongshu')}
                         style={{ color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.875rem' }}
                       >
-                        {copiedSection === 'xiaohongshu' ? <><CheckCircle2 size={16} color="#10b981"/> 已复制</> : <><Copy size={16} /> 复制</>}
+                        {copiedSection === 'xiaohongshu' ? <><CheckCircle2 size={16} color="#10b981"/> {t.common.copied}</> : <><Copy size={16} /> {t.common.copy}</>}
                       </button>
                     </div>
                     <div style={{ padding: '1rem', whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>
@@ -459,12 +462,12 @@ ${language === 'CN' ? `输出三个版本，版本间用「---」分隔：
                 {generatedResults.chineseTweet && (
                   <div style={{ border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', borderBottom: '1px solid var(--border-color)', backgroundColor: 'var(--bg-surface-hover)' }}>
-                      <h4 style={{ fontWeight: 600 }}>中文推文</h4>
+                      <h4 style={{ fontWeight: 600 }}>{t.drafts.platforms.twitter_cn}</h4>
                       <button
                         onClick={() => copyToClipboard(generatedResults.chineseTweet!, 'chineseTweet')}
                         style={{ color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.875rem' }}
                       >
-                        {copiedSection === 'chineseTweet' ? <><CheckCircle2 size={16} color="#10b981"/> 已复制</> : <><Copy size={16} /> 复制</>}
+                        {copiedSection === 'chineseTweet' ? <><CheckCircle2 size={16} color="#10b981"/> {t.common.copied}</> : <><Copy size={16} /> {t.common.copy}</>}
                       </button>
                     </div>
                     <div style={{ padding: '1rem', whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>
@@ -477,12 +480,12 @@ ${language === 'CN' ? `输出三个版本，版本间用「---」分隔：
                 {generatedResults.douyinScript && (
                   <div style={{ border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', borderBottom: '1px solid var(--border-color)', backgroundColor: 'var(--bg-surface-hover)' }}>
-                      <h4 style={{ fontWeight: 600 }}>抖音视频脚本</h4>
+                      <h4 style={{ fontWeight: 600 }}>{t.drafts.platforms.douyin}</h4>
                       <button
                         onClick={() => copyToClipboard(generatedResults.douyinScript!, 'douyinScript')}
                         style={{ color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.875rem' }}
                       >
-                        {copiedSection === 'douyinScript' ? <><CheckCircle2 size={16} color="#10b981"/> 已复制</> : <><Copy size={16} /> 复制</>}
+                        {copiedSection === 'douyinScript' ? <><CheckCircle2 size={16} color="#10b981"/> {t.common.copied}</> : <><Copy size={16} /> {t.common.copy}</>}
                       </button>
                     </div>
                     <div style={{ padding: '1rem', whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>
@@ -501,12 +504,12 @@ ${language === 'CN' ? `输出三个版本，版本间用「---」分隔：
                 {generatedResults.englishTweet && (
                   <div style={{ border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', borderBottom: '1px solid var(--border-color)', backgroundColor: 'var(--bg-surface-hover)' }}>
-                      <h4 style={{ fontWeight: 600 }}>Twitter Post</h4>
+                      <h4 style={{ fontWeight: 600 }}>{t.drafts.platforms.twitter_en}</h4>
                       <button
                         onClick={() => copyToClipboard(generatedResults.englishTweet!, 'englishTweet')}
                         style={{ color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.875rem' }}
                       >
-                        {copiedSection === 'englishTweet' ? <><CheckCircle2 size={16} color="#10b981"/> 已复制</> : <><Copy size={16} /> 复制</>}
+                        {copiedSection === 'englishTweet' ? <><CheckCircle2 size={16} color="#10b981"/> {t.common.copied}</> : <><Copy size={16} /> {t.common.copy}</>}
                       </button>
                     </div>
                     <div style={{ padding: '1rem', whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>
@@ -519,12 +522,12 @@ ${language === 'CN' ? `输出三个版本，版本间用「---」分隔：
                 {generatedResults.linkedinPost && (
                   <div style={{ border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', borderBottom: '1px solid var(--border-color)', backgroundColor: 'var(--bg-surface-hover)' }}>
-                      <h4 style={{ fontWeight: 600 }}>LinkedIn Post</h4>
+                      <h4 style={{ fontWeight: 600 }}>{t.drafts.platforms.linkedin}</h4>
                       <button
                         onClick={() => copyToClipboard(generatedResults.linkedinPost!, 'linkedinPost')}
                         style={{ color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.875rem' }}
                       >
-                        {copiedSection === 'linkedinPost' ? <><CheckCircle2 size={16} color="#10b981"/> 已复制</> : <><Copy size={16} /> 复制</>}
+                        {copiedSection === 'linkedinPost' ? <><CheckCircle2 size={16} color="#10b981"/> {t.common.copied}</> : <><Copy size={16} /> {t.common.copy}</>}
                       </button>
                     </div>
                     <div style={{ padding: '1rem', whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>
@@ -537,12 +540,12 @@ ${language === 'CN' ? `输出三个版本，版本间用「---」分隔：
                 {generatedResults.youtubeScript && (
                   <div style={{ border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', borderBottom: '1px solid var(--border-color)', backgroundColor: 'var(--bg-surface-hover)' }}>
-                      <h4 style={{ fontWeight: 600 }}>YouTube Script</h4>
+                      <h4 style={{ fontWeight: 600 }}>{t.drafts.platforms.youtube}</h4>
                       <button
                         onClick={() => copyToClipboard(generatedResults.youtubeScript!, 'youtubeScript')}
                         style={{ color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.875rem' }}
                       >
-                        {copiedSection === 'youtubeScript' ? <><CheckCircle2 size={16} color="#10b981"/> 已复制</> : <><Copy size={16} /> 复制</>}
+                        {copiedSection === 'youtubeScript' ? <><CheckCircle2 size={16} color="#10b981"/> {t.common.copied}</> : <><Copy size={16} /> {t.common.copy}</>}
                       </button>
                     </div>
                     <div style={{ padding: '1rem', whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>
@@ -556,7 +559,7 @@ ${language === 'CN' ? `输出三个版本，版本间用「---」分隔：
           </div>
         ) : (
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--text-secondary)' }}>
-            请在左侧选择一个待深化的草稿
+            {t.drafts.selectDraft}
           </div>
         )}
       </div>

@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useWorkflow } from '../context/WorkflowContext';
 import { Send, ArrowRight, Mic, MicOff, Trash2, X, Check } from 'lucide-react';
+import { translations, type Language } from '../i18n/translations';
 
 // Declare Web Speech API types
 declare global {
@@ -27,7 +28,8 @@ declare global {
   }
 }
 
-export function IdeaInbox({ isMobile }: { isMobile?: boolean }) {
+export function IdeaInbox({ language = 'CN', isMobile }: { language?: Language, isMobile?: boolean }) {
+  const t = translations[language];
   const { ideas, addIdea, updateIdeaStatus, addDraft, deleteIdea } = useWorkflow();
   const [inputText, setInputText] = useState('');
   const [isRecording, setIsRecording] = useState(false);
@@ -42,7 +44,7 @@ export function IdeaInbox({ isMobile }: { isMobile?: boolean }) {
       const recognition = new SpeechRecognition();
       recognition.continuous = true;
       recognition.interimResults = true;
-      recognition.lang = 'zh-CN'; // Set language
+      recognition.lang = language === 'EN' ? 'en-US' : 'zh-CN'; // Set language
 
       recognition.onresult = (event: SpeechRecognitionEvent) => {
         let finalTranscript = '';
@@ -50,8 +52,6 @@ export function IdeaInbox({ isMobile }: { isMobile?: boolean }) {
         for (let i = event.resultIndex; i < event.results.length; ++i) {
           if (event.results[i].isFinal) {
             finalTranscript += event.results[i][0].transcript;
-          } else {
-            // interimTranscript += event.results[i][0].transcript;
           }
         }
         
@@ -78,12 +78,12 @@ export function IdeaInbox({ isMobile }: { isMobile?: boolean }) {
         recognitionRef.current.stop();
       }
     };
-  }, []);
+  }, [language]);
 
   const toggleRecording = (e: React.MouseEvent) => {
     e.preventDefault();
     if (!recognitionRef.current) {
-      alert("Your browser does not support voice input.");
+      alert(t.inbox.voiceNotSupported);
       return;
     }
     
@@ -120,15 +120,15 @@ export function IdeaInbox({ isMobile }: { isMobile?: boolean }) {
   return (
     <div style={{ padding: '1rem 0' }}>
       <header style={{ marginBottom: isMobile ? '1.5rem' : '2.5rem' }}>
-        <h2 style={{ fontSize: isMobile ? '1.5rem' : '1.875rem', fontWeight: 700 }}>选题记录</h2>
-        <p className="text-muted" style={{ marginTop: '0.5rem', fontSize: isMobile ? '0.875rem' : '1rem' }}>你的想法收集箱，所有碎片想法都先扔进来。</p>
+        <h2 style={{ fontSize: isMobile ? '1.5rem' : '1.875rem', fontWeight: 700 }}>{t.inbox.title}</h2>
+        <p className="text-muted" style={{ marginTop: '0.5rem', fontSize: isMobile ? '0.875rem' : '1rem' }}>{t.inbox.subtitle}</p>
       </header>
 
       <form onSubmit={handleSubmit} style={{ position: 'relative', marginBottom: '3rem' }}>
         <textarea
           value={inputText}
           onChange={(e) => setInputText(e.target.value)}
-          placeholder="记录选题：今天有个想法... (点击麦克风可语音输入)"
+          placeholder={t.inbox.placeholder}
           style={{
             width: '100%',
             minHeight: '120px',
@@ -149,7 +149,7 @@ export function IdeaInbox({ isMobile }: { isMobile?: boolean }) {
           <button
             type="button"
             onClick={toggleRecording}
-            title="Voice Input"
+            title={t.inbox.voiceInput}
             style={{
               backgroundColor: isRecording ? '#ef4444' : 'var(--bg-surface-hover)',
               color: isRecording ? 'white' : 'var(--text-primary)',
@@ -187,11 +187,11 @@ export function IdeaInbox({ isMobile }: { isMobile?: boolean }) {
       </form>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        <h3 style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>待处理的想法 ({inboxIdeas.length})</h3>
+        <h3 style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>{t.inbox.pendingIdeas} ({inboxIdeas.length})</h3>
         
         {inboxIdeas.length === 0 ? (
           <div className="glass-panel" style={{ padding: '3rem', textAlign: 'center' }}>
-            <p className="text-muted">想法收集箱空空如也</p>
+            <p className="text-muted">{t.inbox.emptyState}</p>
           </div>
         ) : (
           inboxIdeas.map(idea => (
@@ -206,7 +206,7 @@ export function IdeaInbox({ isMobile }: { isMobile?: boolean }) {
               <div>
                 <p style={{ whiteSpace: 'pre-wrap', marginBottom: '1rem', fontWeight: 500 }}>{idea.content}</p>
                 <span className="text-muted" style={{ fontSize: '0.75rem' }}>
-                  {new Date(idea.createdAt).toLocaleString('zh-CN')}
+                  {new Date(idea.createdAt).toLocaleString(language === 'EN' ? 'en-US' : 'zh-CN')}
                 </span>
               </div>
               <div style={{ display: 'flex', gap: '0.75rem', alignSelf: isMobile ? 'flex-end' : 'flex-start' }}>
@@ -232,7 +232,7 @@ export function IdeaInbox({ isMobile }: { isMobile?: boolean }) {
                         fontWeight: 600
                       }}
                     >
-                      <Check size={14} /> 确认
+                      <Check size={14} /> {t.common.confirm}
                     </button>
                     <button
                       onClick={(e) => {
@@ -253,7 +253,7 @@ export function IdeaInbox({ isMobile }: { isMobile?: boolean }) {
                         fontWeight: 600
                       }}
                     >
-                      <X size={14} /> 取消
+                      <X size={14} /> {t.common.cancel}
                     </button>
                   </div>
                 ) : (
@@ -311,7 +311,7 @@ export function IdeaInbox({ isMobile }: { isMobile?: boolean }) {
                     e.currentTarget.style.color = 'var(--accent-primary)';
                   }}
                 >
-                  深化
+                  {t.inbox.expand}
                   <ArrowRight size={16} />
                 </button>
               </div>
@@ -322,3 +322,4 @@ export function IdeaInbox({ isMobile }: { isMobile?: boolean }) {
     </div>
   );
 }
+

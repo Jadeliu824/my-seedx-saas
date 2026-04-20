@@ -4,15 +4,17 @@ import { IdeaInbox } from './views/IdeaInbox';
 import { DraftGenerator } from './views/DraftGenerator';
 import { MaterialLibrary } from './views/MaterialLibrary';
 import { AnalyticsView } from './views/AnalyticsView';
+import { type Language } from './i18n/translations';
 
 export type ViewState = 'inbox' | 'drafts' | 'materials' | 'analytics';
 
 function App() {
   const [currentView, setCurrentView] = useState<ViewState>('inbox');
-  const [language, setLanguage] = useState<'CN' | 'EN'>(() => {
-    return (localStorage.getItem('seedx_language') as 'CN' | 'EN') || 'CN';
+  const [language, setLanguage] = useState<Language>(() => {
+    return (localStorage.getItem('seedx_language') as Language) || 'CN';
   });
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
 
   useEffect(() => {
     localStorage.setItem('seedx_language', language);
@@ -33,7 +35,7 @@ function App() {
       overflow: 'hidden',
       backgroundColor: 'var(--bg-base)'
     }}>
-      <Sidebar currentView={currentView} onViewChange={setCurrentView} isMobile={isMobile} />
+      <Sidebar currentView={currentView} onViewChange={setCurrentView} language={language} isMobile={isMobile} />
       
       <main style={{ 
         flex: 1, 
@@ -98,10 +100,10 @@ function App() {
           paddingBottom: isMobile ? 'calc(var(--nav-height) + 1rem)' : '2rem'
         }}>
           <div style={{ maxWidth: '1000px', margin: '0 auto', height: '100%' }}>
-            {currentView === 'inbox' && <IdeaInbox />}
+            {currentView === 'inbox' && <IdeaInbox language={language} isMobile={isMobile} />}
             {currentView === 'drafts' && <DraftGenerator language={language} isMobile={isMobile} />}
-            {currentView === 'materials' && <MaterialLibrary isMobile={isMobile} />}
-            {currentView === 'analytics' && <AnalyticsView />}
+            {currentView === 'materials' && <MaterialLibrary language={language} isMobile={isMobile} />}
+            {currentView === 'analytics' && <AnalyticsView language={language} isMobile={isMobile} />}
           </div>
         </div>
       </main>
@@ -110,3 +112,4 @@ function App() {
 }
 
 export default App;
+
