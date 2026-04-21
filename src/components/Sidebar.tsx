@@ -1,4 +1,4 @@
-import { Lightbulb, Edit3, Layers, BarChart3, LogOut, User } from 'lucide-react';
+import { Lightbulb, Edit3, Layers, BarChart3, LogOut, User, PenTool } from 'lucide-react';
 import type { ViewState } from '../App';
 import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
@@ -17,6 +17,7 @@ export function Sidebar({ currentView, onViewChange, language = 'CN', isMobile }
 
   const navItems: { id: ViewState; label: string; icon: React.ElementType }[] = [
     { id: 'inbox', label: t.sidebar.inbox, icon: Lightbulb },
+    { id: 'style', label: t.style.title, icon: PenTool },
     { id: 'drafts', label: t.sidebar.drafts, icon: Edit3 },
     { id: 'materials', label: t.sidebar.materials, icon: Layers },
     { id: 'analytics', label: t.sidebar.analytics, icon: BarChart3 },
@@ -177,6 +178,7 @@ export function Sidebar({ currentView, onViewChange, language = 'CN', isMobile }
           const Icon = item.icon;
           const isActive = currentView === item.id;
           const fullLabel = item.id === 'inbox' ? t.sidebar.ideaInbox :
+                            item.id === 'style' ? t.style.title :
                             item.id === 'drafts' ? t.sidebar.draftGenerator :
                             item.id === 'materials' ? t.sidebar.materialLibrary :
                             t.sidebar.dataAnalytics;

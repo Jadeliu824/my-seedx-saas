@@ -2,11 +2,12 @@ import { useState, useEffect } from 'react';
 import { Sidebar } from './components/Sidebar';
 import { IdeaInbox } from './views/IdeaInbox';
 import { DraftGenerator } from './views/DraftGenerator';
+import { StyleView } from './views/StyleView';
 import { MaterialLibrary } from './views/MaterialLibrary';
 import { AnalyticsView } from './views/AnalyticsView';
 import { type Language } from './i18n/translations';
 
-export type ViewState = 'inbox' | 'drafts' | 'materials' | 'analytics';
+export type ViewState = 'inbox' | 'drafts' | 'style' | 'materials' | 'analytics';
 
 function App() {
   const [currentView, setCurrentView] = useState<ViewState>('inbox');
@@ -102,6 +103,7 @@ function App() {
           <div style={{ maxWidth: '1000px', margin: '0 auto', height: '100%' }}>
             {currentView === 'inbox' && <IdeaInbox language={language} isMobile={isMobile} />}
             {currentView === 'drafts' && <DraftGenerator language={language} isMobile={isMobile} />}
+            {currentView === 'style' && <StyleView language={language} isMobile={isMobile} />}
             {currentView === 'materials' && <MaterialLibrary language={language} isMobile={isMobile} />}
             {currentView === 'analytics' && <AnalyticsView language={language} isMobile={isMobile} />}
           </div>

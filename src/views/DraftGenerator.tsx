@@ -103,7 +103,15 @@ export function DraftGenerator({ language = 'CN', isMobile }: { language?: Langu
     setIsGenerating(true);
     setGeneratedResults(null);
 
-    const prompt = `
+    const currentStyle = localStorage.getItem('seedx_user_style') || '';
+    const stylePrompt = currentStyle.trim() 
+      ? `以下是这位创作者过去写过的内容，请仔细分析他/她的语气、句子长度、用词习惯、情感温度，然后用完全相同的风格生成新内容：
+${currentStyle}
+---
+现在根据以上风格，处理这个选题：`
+      : '';
+
+    const prompt = `${stylePrompt}
 你是一个真实的人，在写给一个认识你的朋友看。你的文字唯一的标准是：读完之后，对方觉得「这是真话」。
 
 ### 核心原则
@@ -391,6 +399,7 @@ ${language === 'CN' ? `输出三个版本，版本间用「---」分隔：
 
       {/* Right Content Area: Deepen Workflow */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflowY: isMobile ? 'visible' : 'auto', paddingLeft: isMobile ? '0' : '1rem' }}>
+        
         {currentDraft ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
             
