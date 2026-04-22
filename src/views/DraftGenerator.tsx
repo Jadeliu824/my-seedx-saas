@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useWorkflow } from '../context/WorkflowContext';
 import { Sparkles, Copy, CheckCircle2, Trash2, X, Check } from 'lucide-react';
 import { translations, type Language } from '../i18n/translations';
-import type { PlatformDraft } from '../types';
+
 
 export function DraftGenerator({ language = 'EN', isMobile }: { language?: Language; isMobile?: boolean }) {
   const t = translations[language];
@@ -329,6 +329,11 @@ ${language === 'CN' ? `输出三个版本，版本间用「---」分隔：
       return;
     }
 
+    if (!import.meta.env.VITE_DEEPSEEK_API_KEY) {
+      alert(t.drafts.apiKeyMissing);
+      return;
+    }
+
     const feedback = (sectionFeedback[sectionKey] || '').trim();
     const draftId = currentDraft.id;
 
@@ -440,7 +445,7 @@ ${sectionInstructions[sectionKey] || ''}
       };
 
       if (platformMap[sectionKey]) {
-        updatePlatformDraft(draftId, platformMap[sectionKey] as PlatformDraft['platform'], text);
+        updatePlatformDraft(draftId, platformMap[sectionKey] as any, text);
       }
 
       if (feedback) {
