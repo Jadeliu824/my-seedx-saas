@@ -12,7 +12,7 @@ export type ViewState = 'inbox' | 'drafts' | 'style' | 'materials' | 'analytics'
 function App() {
   const [currentView, setCurrentView] = useState<ViewState>('inbox');
   const [language, setLanguage] = useState<Language>(() => {
-    return (localStorage.getItem('seedx_language') as Language) || 'CN';
+    return (localStorage.getItem('seedx_language') as Language) || 'EN';
   });
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
@@ -24,7 +24,17 @@ function App() {
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 768);
     window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+
+    // Listen for navigation to style view
+    const handleNavigateToStyle = () => {
+      setCurrentView('style');
+    };
+    window.addEventListener('seedx_navigate_to_style', handleNavigateToStyle);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('seedx_navigate_to_style', handleNavigateToStyle);
+    };
   }, []);
 
   return (

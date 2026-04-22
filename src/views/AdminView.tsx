@@ -12,7 +12,7 @@ interface WaitlistEntry {
 export function AdminView() {
   const [waitlist, setWaitlist] = useState<WaitlistEntry[]>([]);
   const [loading, setLoading] = useState(true);
-  const isEN = localStorage.getItem('seedx_language') === 'EN';
+  const isEN = localStorage.getItem('seedx_language') !== 'CN';
   const t = isEN ? translations.EN : translations.CN;
 
   useEffect(() => {

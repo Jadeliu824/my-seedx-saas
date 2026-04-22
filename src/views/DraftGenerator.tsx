@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react';
 import { useWorkflow } from '../context/WorkflowContext';
 import { Sparkles, Copy, CheckCircle2, Trash2, X, Check } from 'lucide-react';
 import { translations, type Language } from '../i18n/translations';
+import type { PlatformDraft } from '../types';
 
-export function DraftGenerator({ language = 'CN', isMobile }: { language?: Language; isMobile?: boolean }) {
+export function DraftGenerator({ language = 'EN', isMobile }: { language?: Language; isMobile?: boolean }) {
   const t = translations[language];
   const isEN = language === 'EN';
   const { drafts, ideas, updatePlatformDraft, deleteDraft } = useWorkflow();
@@ -25,6 +26,16 @@ export function DraftGenerator({ language = 'CN', isMobile }: { language?: Langu
   
   // Usage limit state
   const [usageCount, setUsageCount] = useState(0);
+
+  // Regeneration state
+  const [regeneratingSection, setRegeneratingSection] = useState<string | null>(null);
+  const [sectionFeedback, setSectionFeedback] = useState<Record<string, string>>({});
+  const [styleRefinements, setStyleRefinements] = useState<string[]>(() => {
+    try {
+      const stored = localStorage.getItem('seedx_style_refinements');
+      return stored ? JSON.parse(stored) : [];
+    } catch { return []; }
+  });
 
   // Constants
   const DAILY_LIMIT = 3;
@@ -48,6 +59,12 @@ export function DraftGenerator({ language = 'CN', isMobile }: { language?: Langu
       localStorage.setItem(USAGE_KEY, JSON.stringify({ date: today, count: 0 }));
     }
   }, []);
+
+  // Save style refinements to localStorage
+  useEffect(() => {
+    localStorage.setItem('seedx_style_refinements', JSON.stringify(styleRefinements));
+  }, [styleRefinements]);
+
   const currentDraft = drafts.find(d => d.id === selectedDraftId);
   const currentIdea = currentDraft ? ideas.find(i => i.id === currentDraft.ideaId) : null;
 
@@ -104,11 +121,42 @@ export function DraftGenerator({ language = 'CN', isMobile }: { language?: Langu
     setGeneratedResults(null);
 
     const currentStyle = localStorage.getItem('seedx_user_style') || '';
-    const stylePrompt = currentStyle.trim() 
-      ? `以下是这位创作者过去写过的内容，请仔细分析他/她的语气、句子长度、用词习惯、情感温度，然后用完全相同的风格生成新内容：
+    const stylePrompt = currentStyle.trim()
+      ? language === 'CN'
+        ? `## 创作者的个人写作风格（请严格模仿）
+以下是这位创作者过去写过的内容，请仔细分析以下特征：
+1. **语气**：是正式、随意、幽默、严肃、亲切还是其他？
+2. **句子长度**：长句多还是短句多？平均句子长度是多少？
+3. **用词习惯**：喜欢用哪些特定词汇？避免用哪些词汇？
+4. **情感温度**：文字给人的感觉是温暖、冷静、理性、感性？
+5. **段落结构**：段落长短如何？如何过渡？
+6. **修辞手法**：常用比喻、排比、反问等手法吗？
+7. **节奏感**：文字的阅读节奏是快是慢？
+8. **人称使用**：多用"我"、"我们"还是"你"？
+
+请基于以上分析，用完全相同的风格生成新内容。请优先模仿以下风格，而不是参考后面的通用样本：
+
 ${currentStyle}
----
+
+--- 风格模仿结束 ---
 现在根据以上风格，处理这个选题：`
+        : `## Creator's Personal Writing Style (Strict Imitation Required)
+Here are pieces this creator has written in the past. Please analyze the following characteristics:
+1. **Tone**: Is it formal, casual, humorous, serious,亲切, or something else?
+2. **Sentence length**: Mostly long sentences or short sentences? What's the average sentence length?
+3. **Word choice**: What specific vocabulary do they prefer? What words do they avoid?
+4. **Emotional temperature**: Does the writing feel warm,冷静, rational, emotional?
+5. **Paragraph structure**: How long are paragraphs? How are transitions handled?
+6. **Rhetorical devices**: Do they常用比喻, parallelism, rhetorical questions, etc.?
+7. **Rhythm**: Is the reading pace fast or slow?
+8. **Pronoun usage**: Do they use "I", "we", or "you" more often?
+
+Based on this analysis, generate new content in the exact same style. Prioritize imitating the style below over referencing the generic samples later:
+
+${currentStyle}
+
+--- End of Style Imitation ---
+Now, based on the above style, process this topic:`
       : '';
 
     const prompt = `${stylePrompt}
@@ -132,7 +180,7 @@ ${currentStyle}
 - ❗🔥✅ 任何符号装饰，禁止使用 Markdown 符号（如 **、*）。
 
 ### 参考风格 (Golden Samples)
-请严格参考以下两个样本当中的文字节奏、留白感和细节描写：
+${currentStyle.trim() ? '（已提供个人写作风格，请优先模仿上方风格；以下样本仅作通用参考）' : '请严格参考以下两个样本当中的文字节奏、留白感和细节描写：'}
 
 【样本一】
 标题一：我记了一周的情绪流水账
@@ -261,6 +309,255 @@ ${language === 'CN' ? `输出三个版本，版本间用「---」分隔：
     setCopiedSection(section);
     setTimeout(() => setCopiedSection(null), 2000);
   };
+
+  const addToStyle = (text: string) => {
+    const currentStyle = localStorage.getItem('seedx_user_style') || '';
+    const separator = currentStyle ? '\n\n---\n\n' : '';
+    const newStyle = currentStyle + separator + text;
+    localStorage.setItem('seedx_user_style', newStyle);
+    // Update state if StyleView is mounted elsewhere
+    window.dispatchEvent(new StorageEvent('storage', { key: 'seedx_user_style', newValue: newStyle }));
+    // Also dispatch a custom event for same-tab updates
+    window.dispatchEvent(new CustomEvent('seedx_style_updated', { detail: newStyle }));
+    alert(t.drafts.styleAdded);
+  };
+
+  const handleRegenerateSection = async (sectionKey: string) => {
+    if (!currentIdea || !currentDraft) return;
+    if (usageCount >= DAILY_LIMIT) {
+      alert(t.drafts.limitAlert);
+      return;
+    }
+
+    const feedback = (sectionFeedback[sectionKey] || '').trim();
+    const draftId = currentDraft.id;
+
+    setIsGenerating(true);
+
+    const currentStyle = localStorage.getItem('seedx_user_style') || '';
+
+    const refinementsText = styleRefinements.length > 0
+      ? `\n\n### ${language === 'CN' ? '用户的历史风格反馈（请重点参考）' : 'User\'s historical style feedback (prioritize these)'}\n${styleRefinements.map(r => `- ${r}`).join('\n')}`
+      : '';
+
+    const feedbackText = feedback
+      ? `\n\n### ${language === 'CN' ? '用户对本次生成的具体要求' : 'User\'s specific request for this generation'}\n${feedback}`
+      : '';
+
+    const sectionNames: Record<string, string> = {
+      xiaohongshu: language === 'CN' ? '小红书笔记' : 'RED Note',
+      chineseTweet: language === 'CN' ? '中文推文' : 'Chinese Tweet',
+      douyinScript: language === 'CN' ? '抖音视频脚本' : 'Douyin Script',
+      englishTweet: 'Twitter Post',
+      linkedinPost: 'LinkedIn Post',
+      youtubeScript: 'YouTube Script',
+    };
+
+    const sectionInstructions: Record<string, string> = {
+      xiaohongshu: language === 'CN' ? '500字左右，自然分段，包含3个备选标题和5个标签。标题要克制，不要标题党。' : 'Around 500 words, natural paragraphs, with 3 alternative titles and 5 tags.',
+      chineseTweet: language === 'CN' ? '1条，100字以内，说清一个核心观察/观点，说完就停。' : '1 post, under 100 words, one clear observation. Stop when done.',
+      douyinScript: language === 'CN' ? '适合短视频的文案脚本，长度控制在1分钟以内，包含画面视觉建议和口播文案。真人出镜风格。' : 'Short video script under 1 minute, with visual suggestions and narration. Talking head style.',
+      englishTweet: '1 post, no hashtags, one sharp observation. Make it punchy.',
+      linkedinPost: 'Professional but sincere, 150-200 words, personal reflection with resonance.',
+      youtubeScript: 'Short script outline with Hook, body narration, and visual suggestions.',
+    };
+
+    const styleSection = currentStyle.trim()
+      ? (language === 'CN'
+        ? `## 创作者的个人写作风格（请严格模仿）
+分析以下内容的语气、句子长度、用词习惯、情感温度、段落结构、修辞手法、节奏感和人称使用，然后用完全相同的风格生成：
+
+${currentStyle}`
+        : `## Creator's Personal Writing Style (Strict Imitation Required)
+Analyze the tone, sentence length, word choice, emotional temperature, paragraph structure, rhetorical devices, rhythm, and pronoun usage. Then generate in the exact same style:
+
+${currentStyle}`)
+      : '';
+
+    const prompt = `${styleSection}
+
+${refinementsText}
+${feedbackText}
+
+${language === 'CN'
+      ? `### 核心原则
+1. **用具体代替抽象**：禁用形容词，改用数字、动作和场景。
+2. **不解释，只描述**：不要告诉读者这意味着什么，让他们自己得出结论。
+3. **说一件事就够了**：找到那一个最真实的感受，把它说清楚，停下来。
+4. **结尾不要总结**：不要「所以我觉得」「希望大家」。
+5. **禁止使用**：赋能/破局/内卷/干货/划重点/本质上/维度；首先/其次/最后/总结一下；「我们」开头句式；任何符号装饰或 Markdown 语法。`
+      : `### Core Principles
+1. **Be specific**: Use numbers, actions, and scenes.
+2. **Show, don't tell**: Let readers draw conclusions.
+3. **One thing is enough**: Find one authentic feeling.
+4. **No summaries**: No "I think" or "in conclusion".
+5. **No buzzwords**: No emojis, Markdown symbols, or clichés.`}
+
+### 任务
+选题："""${currentIdea.content}"""
+
+请只生成「${sectionNames[sectionKey]}」版本。
+${sectionInstructions[sectionKey] || ''}
+
+直接输出内容，不要任何开场白或解释。`;
+
+    try {
+      const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_DEEPSEEK_API_KEY}`
+        },
+        body: JSON.stringify({
+          model: 'deepseek-chat',
+          messages: [{ role: 'user', content: prompt }],
+          max_tokens: 1000
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(`${language === 'CN' ? 'API 请求失败' : 'API request failed'} (${response.status}): ${errorData.error?.message || response.statusText}`);
+      }
+
+      const data = await response.json();
+      let text = data.choices[0]?.message?.content || '';
+
+      text = text.replace(/\*\*/g, '').replace(/\*/g, '').replace(/#+ /g, '').trim();
+
+      setGeneratedResults(prev => ({
+        ...prev,
+        [sectionKey]: text
+      }));
+
+      const platformMap: Record<string, 'xiaohongshu' | 'twitter_cn' | 'douyin' | 'twitter_en' | 'linkedin' | 'youtube'> = {
+        xiaohongshu: 'xiaohongshu',
+        chineseTweet: 'twitter_cn',
+        douyinScript: 'douyin',
+        englishTweet: 'twitter_en',
+        linkedinPost: 'linkedin',
+        youtubeScript: 'youtube'
+      };
+
+      if (platformMap[sectionKey]) {
+        updatePlatformDraft(draftId, platformMap[sectionKey] as PlatformDraft['platform'], text);
+      }
+
+      if (feedback) {
+        setStyleRefinements(prev => [...prev, feedback]);
+      }
+
+      const today = new Date().toLocaleDateString();
+      const newCount = usageCount + 1;
+      setUsageCount(newCount);
+      localStorage.setItem(USAGE_KEY, JSON.stringify({ date: today, count: newCount }));
+
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.error('Regeneration error:', err);
+      alert(t.drafts.generationFailed + ': ' + (message || t.drafts.checkNetwork));
+    } finally {
+      setIsGenerating(false);
+      setRegeneratingSection(null);
+      setSectionFeedback(prev => ({ ...prev, [sectionKey]: '' }));
+    }
+  };
+
+  const renderFeedbackArea = (sectionKey: string) => {
+    if (regeneratingSection !== sectionKey) return null;
+    return (
+      <div style={{
+        padding: '1rem',
+        borderBottom: '1px solid var(--border-color)',
+        backgroundColor: 'rgba(255, 183, 235, 0.05)'
+      }}>
+        <textarea
+          value={sectionFeedback[sectionKey] || ''}
+          onChange={(e) => setSectionFeedback(prev => ({ ...prev, [sectionKey]: e.target.value }))}
+          placeholder={t.drafts.feedbackPlaceholder}
+          rows={2}
+          style={{
+            width: '100%',
+            padding: '0.5rem',
+            borderRadius: 'var(--radius-sm)',
+            border: '1px solid var(--border-color)',
+            backgroundColor: 'rgba(0,0,0,0.2)',
+            color: 'var(--text-primary)',
+            fontSize: '0.875rem',
+            resize: 'none'
+          }}
+        />
+        <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem', justifyContent: 'flex-end' }}>
+          <button
+            onClick={() => {
+              setRegeneratingSection(null);
+              setSectionFeedback(prev => ({ ...prev, [sectionKey]: '' }));
+            }}
+            style={{
+              padding: '0.4rem 0.75rem',
+              borderRadius: 'var(--radius-sm)',
+              border: '1px solid var(--border-color)',
+              color: 'var(--text-secondary)',
+              fontSize: '0.8rem'
+            }}
+          >
+            {t.common.cancel}
+          </button>
+          <button
+            onClick={() => handleRegenerateSection(sectionKey)}
+            disabled={isGenerating}
+            style={{
+              padding: '0.4rem 0.75rem',
+              borderRadius: 'var(--radius-sm)',
+              backgroundColor: 'var(--accent-primary)',
+              color: '#000',
+              fontSize: '0.8rem',
+              fontWeight: 600,
+              opacity: isGenerating ? 0.6 : 1,
+              cursor: isGenerating ? 'not-allowed' : 'pointer'
+            }}
+          >
+            {isGenerating ? t.drafts.aiThinking : (sectionFeedback[sectionKey]?.trim() ? t.drafts.feedbackSubmit : t.drafts.regenerate)}
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+  const renderSectionButtons = (sectionKey: string, content: string) => (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+      <button
+        onClick={() => addToStyle(content)}
+        title={t.drafts.styleAdded}
+        style={{ color: 'var(--accent-primary)', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.875rem' }}
+      >
+        <Sparkles size={16} />
+        {t.drafts.styleAdded}
+      </button>
+      <button
+        onClick={() => copyToClipboard(content, sectionKey)}
+        style={{ color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.875rem' }}
+      >
+        {copiedSection === sectionKey ? <><CheckCircle2 size={16} color="#10b981"/> {t.common.copied}</> : <><Copy size={16} /> {t.common.copy}</>}
+      </button>
+      <button
+        onClick={() => setRegeneratingSection(sectionKey)}
+        disabled={isGenerating}
+        style={{
+          color: 'var(--accent-primary)',
+          fontSize: '0.75rem',
+          fontWeight: 600,
+          padding: '0.25rem 0.5rem',
+          borderRadius: 'var(--radius-sm)',
+          border: '1px solid var(--accent-primary)',
+          opacity: isGenerating ? 0.5 : 1,
+          cursor: isGenerating ? 'not-allowed' : 'pointer'
+        }}
+      >
+        {t.drafts.regenerate}
+      </button>
+    </div>
+  );
 
   return (
     <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? '1rem' : '2rem', height: '100%' }}>
@@ -427,22 +724,60 @@ ${language === 'CN' ? `输出三个版本，版本间用「---」分隔：
               </button>
               
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-muted)', fontSize: '0.75rem' }}>
-                <div style={{ 
-                  width: '100px', 
-                  height: '4px', 
-                  backgroundColor: 'var(--border-color)', 
+                <div style={{
+                  width: '100px',
+                  height: '4px',
+                  backgroundColor: 'var(--border-color)',
                   borderRadius: '2px',
                   overflow: 'hidden'
                 }}>
-                  <div style={{ 
-                    width: `${(usageCount / DAILY_LIMIT) * 100}%`, 
-                    height: '100%', 
+                  <div style={{
+                    width: `${(usageCount / DAILY_LIMIT) * 100}%`,
+                    height: '100%',
                     backgroundColor: usageCount >= DAILY_LIMIT ? '#ef4444' : 'var(--accent-primary)',
                     transition: 'width 0.3s ease'
                   }} />
                 </div>
                 <span>{t.drafts.usageLimit(usageCount, DAILY_LIMIT)}</span>
               </div>
+
+              {!localStorage.getItem('seedx_user_style')?.trim() && (
+                <div style={{
+                  fontSize: '0.75rem',
+                  color: 'var(--accent-primary)',
+                  backgroundColor: 'rgba(255, 183, 235, 0.1)',
+                  padding: '0.5rem 0.75rem',
+                  borderRadius: 'var(--radius-md)',
+                  border: '1px solid rgba(255, 183, 235, 0.3)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem'
+                }}>
+                  <Sparkles size={12} />
+                  <span>
+                    {language === 'CN'
+                      ? '设置写作风格可获得更个性化的内容 →'
+                      : 'Set writing style for more personalized content →'}
+                  </span>
+                  <button
+                    onClick={() => {
+                      // Navigate to style view
+                      window.dispatchEvent(new CustomEvent('seedx_navigate_to_style'));
+                    }}
+                    style={{
+                      fontSize: '0.75rem',
+                      color: 'var(--accent-primary)',
+                      fontWeight: 600,
+                      textDecoration: 'underline',
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {language === 'CN' ? '去设置' : 'Go to settings'}
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* AI Results */}
@@ -453,13 +788,9 @@ ${language === 'CN' ? `输出三个版本，版本间用「---」分隔：
                   <div style={{ border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', borderBottom: '1px solid var(--border-color)', backgroundColor: 'var(--bg-surface-hover)' }}>
                       <h4 style={{ fontWeight: 600 }}>{t.drafts.platforms.xiaohongshu}</h4>
-                      <button
-                        onClick={() => copyToClipboard(generatedResults.xiaohongshu!, 'xiaohongshu')}
-                        style={{ color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.875rem' }}
-                      >
-                        {copiedSection === 'xiaohongshu' ? <><CheckCircle2 size={16} color="#10b981"/> {t.common.copied}</> : <><Copy size={16} /> {t.common.copy}</>}
-                      </button>
+                      {renderSectionButtons('xiaohongshu', generatedResults.xiaohongshu)}
                     </div>
+                    {renderFeedbackArea('xiaohongshu')}
                     <div style={{ padding: '1rem', whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>
                       {generatedResults.xiaohongshu}
                     </div>
@@ -470,13 +801,9 @@ ${language === 'CN' ? `输出三个版本，版本间用「---」分隔：
                   <div style={{ border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', borderBottom: '1px solid var(--border-color)', backgroundColor: 'var(--bg-surface-hover)' }}>
                       <h4 style={{ fontWeight: 600 }}>{t.drafts.platforms.twitter_cn}</h4>
-                      <button
-                        onClick={() => copyToClipboard(generatedResults.chineseTweet!, 'chineseTweet')}
-                        style={{ color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.875rem' }}
-                      >
-                        {copiedSection === 'chineseTweet' ? <><CheckCircle2 size={16} color="#10b981"/> {t.common.copied}</> : <><Copy size={16} /> {t.common.copy}</>}
-                      </button>
+                      {renderSectionButtons('chineseTweet', generatedResults.chineseTweet)}
                     </div>
+                    {renderFeedbackArea('chineseTweet')}
                     <div style={{ padding: '1rem', whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>
                       {generatedResults.chineseTweet}
                     </div>
@@ -487,13 +814,9 @@ ${language === 'CN' ? `输出三个版本，版本间用「---」分隔：
                   <div style={{ border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', borderBottom: '1px solid var(--border-color)', backgroundColor: 'var(--bg-surface-hover)' }}>
                       <h4 style={{ fontWeight: 600 }}>{t.drafts.platforms.douyin}</h4>
-                      <button
-                        onClick={() => copyToClipboard(generatedResults.douyinScript!, 'douyinScript')}
-                        style={{ color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.875rem' }}
-                      >
-                        {copiedSection === 'douyinScript' ? <><CheckCircle2 size={16} color="#10b981"/> {t.common.copied}</> : <><Copy size={16} /> {t.common.copy}</>}
-                      </button>
+                      {renderSectionButtons('douyinScript', generatedResults.douyinScript)}
                     </div>
+                    {renderFeedbackArea('douyinScript')}
                     <div style={{ padding: '1rem', whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>
                       {generatedResults.douyinScript}
                     </div>
@@ -510,13 +833,9 @@ ${language === 'CN' ? `输出三个版本，版本间用「---」分隔：
                   <div style={{ border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', borderBottom: '1px solid var(--border-color)', backgroundColor: 'var(--bg-surface-hover)' }}>
                       <h4 style={{ fontWeight: 600 }}>{t.drafts.platforms.twitter_en}</h4>
-                      <button
-                        onClick={() => copyToClipboard(generatedResults.englishTweet!, 'englishTweet')}
-                        style={{ color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.875rem' }}
-                      >
-                        {copiedSection === 'englishTweet' ? <><CheckCircle2 size={16} color="#10b981"/> {t.common.copied}</> : <><Copy size={16} /> {t.common.copy}</>}
-                      </button>
+                      {renderSectionButtons('englishTweet', generatedResults.englishTweet)}
                     </div>
+                    {renderFeedbackArea('englishTweet')}
                     <div style={{ padding: '1rem', whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>
                       {generatedResults.englishTweet}
                     </div>
@@ -527,13 +846,9 @@ ${language === 'CN' ? `输出三个版本，版本间用「---」分隔：
                   <div style={{ border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', borderBottom: '1px solid var(--border-color)', backgroundColor: 'var(--bg-surface-hover)' }}>
                       <h4 style={{ fontWeight: 600 }}>{t.drafts.platforms.linkedin}</h4>
-                      <button
-                        onClick={() => copyToClipboard(generatedResults.linkedinPost!, 'linkedinPost')}
-                        style={{ color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.875rem' }}
-                      >
-                        {copiedSection === 'linkedinPost' ? <><CheckCircle2 size={16} color="#10b981"/> {t.common.copied}</> : <><Copy size={16} /> {t.common.copy}</>}
-                      </button>
+                      {renderSectionButtons('linkedinPost', generatedResults.linkedinPost)}
                     </div>
+                    {renderFeedbackArea('linkedinPost')}
                     <div style={{ padding: '1rem', whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>
                       {generatedResults.linkedinPost}
                     </div>
@@ -544,13 +859,9 @@ ${language === 'CN' ? `输出三个版本，版本间用「---」分隔：
                   <div style={{ border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', borderBottom: '1px solid var(--border-color)', backgroundColor: 'var(--bg-surface-hover)' }}>
                       <h4 style={{ fontWeight: 600 }}>{t.drafts.platforms.youtube}</h4>
-                      <button
-                        onClick={() => copyToClipboard(generatedResults.youtubeScript!, 'youtubeScript')}
-                        style={{ color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.875rem' }}
-                      >
-                        {copiedSection === 'youtubeScript' ? <><CheckCircle2 size={16} color="#10b981"/> {t.common.copied}</> : <><Copy size={16} /> {t.common.copy}</>}
-                      </button>
+                      {renderSectionButtons('youtubeScript', generatedResults.youtubeScript)}
                     </div>
+                    {renderFeedbackArea('youtubeScript')}
                     <div style={{ padding: '1rem', whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>
                       {generatedResults.youtubeScript}
                     </div>

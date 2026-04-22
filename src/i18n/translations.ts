@@ -65,6 +65,10 @@ export const translations = {
       stylePlaceholder: '粘贴你过去写过的 2-3 篇内容，SeedX 会学习你的语气和风格',
       styleDescription: 'SeedX 会学习你的写作风格，生成听起来像你写的内容',
       clear: '清除',
+      styleAdded: '已添加到写作风格样本',
+      regenerate: '重新生成',
+      feedbackPlaceholder: '告诉 AI 哪里需要改进...（如：语气更随意、句子更短）',
+      feedbackSubmit: '提交反馈并重新生成',
     },
     style: {
       title: '写作风格',
@@ -231,6 +235,10 @@ export const translations = {
       stylePlaceholder: 'Paste 2-3 pieces of content you\'ve written in the past, SeedX will learn your tone and style',
       styleDescription: 'SeedX will learn your writing style and generate content that sounds like you',
       clear: 'Clear',
+      styleAdded: 'Added to writing style samples',
+      regenerate: 'Regenerate',
+      feedbackPlaceholder: 'Tell AI what to improve... (e.g., more casual, shorter sentences)',
+      feedbackSubmit: 'Submit feedback & regenerate',
     },
     style: {
       title: 'Writing Style',

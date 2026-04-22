@@ -4,7 +4,7 @@ import { BookOpen, Quote, Target, Lightbulb, Plus, Trash2, X, Check } from 'luci
 import { translations } from '../i18n/translations';
 import type { MaterialType } from '../types';
 
-export function MaterialLibrary({ language = 'CN', isMobile }: { language?: 'CN' | 'EN', isMobile?: boolean }) {
+export function MaterialLibrary({ language = 'EN', isMobile }: { language?: 'CN' | 'EN', isMobile?: boolean }) {
   const t = translations[language];
   const { materials, addMaterial, deleteMaterial } = useWorkflow();
   const [activeTab, setActiveTab] = useState('all');

@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabaseClient';
 import { translations, type Language } from '../i18n/translations';
 
 export function LandingPage() {
-  const language = (localStorage.getItem('seedx_language') as Language) || 'CN';
+  const language = (localStorage.getItem('seedx_language') as Language) || 'EN';
   const t = translations[language].landing;
 
   const [isModalOpen, setIsModalOpen] = useState(false);

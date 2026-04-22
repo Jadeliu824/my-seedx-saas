@@ -2,7 +2,7 @@ import { useWorkflow } from '../context/WorkflowContext';
 import { TrendingUp, FileText, CheckCircle2 } from 'lucide-react';
 import { translations } from '../i18n/translations';
 
-export function AnalyticsView({ language = 'CN', isMobile }: { language?: 'CN' | 'EN', isMobile?: boolean }) {
+export function AnalyticsView({ language = 'EN', isMobile }: { language?: 'CN' | 'EN', isMobile?: boolean }) {
   const t = translations[language];
   const { ideas } = useWorkflow();
 

@@ -126,7 +126,7 @@ export function WorkflowProvider({ children }: { children: React.ReactNode }) {
         if (!seededRef.current && list.length === 0) {
           seededRef.current = true;
           const batch = writeBatch(db);
-          const isEN = localStorage.getItem('seedx_language') === 'EN';
+          const isEN = localStorage.getItem('seedx_language') !== 'CN';
           const seedMaterials = isEN ? SEED_MATERIALS_EN : SEED_MATERIALS_CN;
           seedMaterials.forEach((m) => {
             const ref = doc(col('materials'));
@@ -175,7 +175,7 @@ export function WorkflowProvider({ children }: { children: React.ReactNode }) {
       console.log('Idea saved successfully:', id);
     } catch (err) {
       console.error('Failed to add idea:', err);
-      const isEN = localStorage.getItem('seedx_language') === 'EN';
+      const isEN = localStorage.getItem('seedx_language') !== 'CN';
       alert(isEN ? 'Failed to save idea, please check network connection or login status.' : '想法保存失败，请检查网络连接或登录状态。');
       // Revert optimistic update
       setIdeas((prev) => prev.filter(i => i.id !== id));

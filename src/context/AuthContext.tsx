@@ -35,7 +35,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (error: unknown) {
       console.error('Login error:', error);
       const err = error as { code?: string; message?: string };
-      const language = localStorage.getItem('seedx_language') === 'EN' ? 'EN' : 'CN';
+      const language = localStorage.getItem('seedx_language') === 'CN' ? 'CN' : 'EN';
       const t = translations[language];
       if (err.code === 'auth/unauthorized-domain') {
         alert(t.auth.loginFailedDomain);

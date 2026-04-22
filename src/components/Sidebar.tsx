@@ -11,7 +11,7 @@ interface SidebarProps {
   isMobile?: boolean;
 }
 
-export function Sidebar({ currentView, onViewChange, language = 'CN', isMobile }: SidebarProps) {
+export function Sidebar({ currentView, onViewChange, language = 'EN', isMobile }: SidebarProps) {
   const { user, loginWithGoogle, logout } = useAuth();
   const t = translations[language];
 

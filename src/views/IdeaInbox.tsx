@@ -28,7 +28,7 @@ declare global {
   }
 }
 
-export function IdeaInbox({ language = 'CN', isMobile }: { language?: Language, isMobile?: boolean }) {
+export function IdeaInbox({ language = 'EN', isMobile }: { language?: Language, isMobile?: boolean }) {
   const t = translations[language];
   const { ideas, addIdea, updateIdeaStatus, addDraft, deleteIdea } = useWorkflow();
   const [inputText, setInputText] = useState('');
