@@ -120,7 +120,7 @@ export function StyleView({ language = 'EN', isMobile }: { language?: Language; 
           <ul style={{ margin: 0, paddingLeft: '1rem', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
             <li>{language === 'CN' ? '粘贴 2-3 篇你过去写过的完整内容' : 'Paste 2-3 complete pieces you\'ve written in the past'}</li>
             <li>{language === 'CN' ? '包含不同情绪和主题的内容效果更好' : 'Include content with different emotions and topics for better results'}</li>
-            <li>{language === 'CN' ? '使用 AI 生成的「添加到写作风格样本」按钮持续丰富你的风格库' : 'Use the "Add to writing style samples" button on AI-generated content to continuously enrich your style library'}</li>
+            <li>{language === 'CN' ? '使用「添加到写作风格样本」按钮持续丰富你的风格库' : 'Use the "Add to writing style samples" button to continuously enrich your style library'}</li>
             <li>{language === 'CN' ? 'SeedX 会随着时间学习你的声音、风格和品味' : 'SeedX will learn your voice, style, and taste over time'}</li>
           </ul>
         </div>
