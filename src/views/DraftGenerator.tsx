@@ -103,11 +103,16 @@ export function DraftGenerator({ language = 'EN', isMobile }: { language?: Langu
 
   const handleDeepen = async () => {
     if (!currentIdea || !currentDraft) return;
-    
-    // Check usage limit
-    if (usageCount >= DAILY_LIMIT) {
-      alert(t.drafts.limitAlert);
-      return;
+
+    // Check developer mode
+    if (localStorage.getItem('seedx_dev_mode') === 'true') {
+      // Skip usage limit in dev mode
+    } else {
+      // Check usage limit
+      if (usageCount >= DAILY_LIMIT) {
+        alert(t.drafts.limitAlert);
+        return;
+      }
     }
 
     const draftId = currentDraft.id;
@@ -123,46 +128,64 @@ export function DraftGenerator({ language = 'EN', isMobile }: { language?: Langu
     const currentStyle = localStorage.getItem('seedx_user_style') || '';
     const stylePrompt = currentStyle.trim()
       ? language === 'CN'
-        ? `## 创作者的个人写作风格（请严格模仿）
-以下是这位创作者过去写过的内容，请仔细分析以下特征：
-1. **语气**：是正式、随意、幽默、严肃、亲切还是其他？
-2. **句子长度**：长句多还是短句多？平均句子长度是多少？
-3. **用词习惯**：喜欢用哪些特定词汇？避免用哪些词汇？
-4. **情感温度**：文字给人的感觉是温暖、冷静、理性、感性？
-5. **段落结构**：段落长短如何？如何过渡？
-6. **修辞手法**：常用比喻、排比、反问等手法吗？
-7. **节奏感**：文字的阅读节奏是快是慢？
-8. **人称使用**：多用"我"、"我们"还是"你"？
+        ? `## 创作者的个人写作风格（严格模仿要求）
 
-请基于以上分析，用完全相同的风格生成新内容。请优先模仿以下风格，而不是参考后面的通用样本：
+以下是这位创作者过去写过的内容样本。请**完全模仿**以下样本的写作风格，包括：
 
+### 必须模仿的风格要素：
+1. **语气和口吻**：完全复制样本中的语气（正式/随意/幽默/严肃/亲切等）
+2. **句子结构和长度**：匹配样本的句子长度分布（长句/短句比例）和句式结构
+3. **词汇选择**：使用样本中常见的词汇和表达方式，避免样本中不出现的词汇
+4. **情感基调**：保持样本中的情感温度（温暖/冷静/理性/感性）
+5. **段落结构**：模仿样本的段落长度、过渡方式和节奏感
+6. **修辞手法**：如果样本使用比喻、排比、反问等，在适当场合使用类似手法
+7. **人称和视角**：保持样本中使用的人称（我/我们/你）和叙述视角
+8. **节奏和韵律**：模仿文字的阅读节奏和韵律感
+
+### 重要原则：
+- **优先模仿样本风格**：即使样本中包含通常禁止的词汇（如"赋能"、"内卷"等），也要忠实模仿
+- **不要创新风格**：不要添加样本中没有的风格元素
+- **一致性高于一切**：确保生成内容与样本风格完全一致
+
+### 风格样本：
 ${currentStyle}
+
+### 风格模仿指令：
+请基于以上样本，用**完全相同的风格**生成新内容。你的目标是让读者无法区分这是AI生成的还是创作者本人写的。
 
 --- 风格模仿结束 ---
 现在根据以上风格，处理这个选题：`
         : `## Creator's Personal Writing Style (Strict Imitation Required)
-Here are pieces this creator has written in the past. Please analyze the following characteristics:
-1. **Tone**: Is it formal, casual, humorous, serious,亲切, or something else?
-2. **Sentence length**: Mostly long sentences or short sentences? What's the average sentence length?
-3. **Word choice**: What specific vocabulary do they prefer? What words do they avoid?
-4. **Emotional temperature**: Does the writing feel warm,冷静, rational, emotional?
-5. **Paragraph structure**: How long are paragraphs? How are transitions handled?
-6. **Rhetorical devices**: Do they常用比喻, parallelism, rhetorical questions, etc.?
-7. **Rhythm**: Is the reading pace fast or slow?
-8. **Pronoun usage**: Do they use "I", "we", or "you" more often?
 
-Based on this analysis, generate new content in the exact same style. Prioritize imitating the style below over referencing the generic samples later:
+Here are writing samples from this creator. Please **exactly imitate** the following style, including:
 
+### Style Elements to Imitate:
+1. **Tone and voice**: Exactly replicate the tone (formal/casual/humorous/serious/warm, etc.)
+2. **Sentence structure and length**: Match the sentence length distribution and syntactic patterns
+3. **Word choice**: Use vocabulary and expressions common in the samples, avoid words not found in samples
+4. **Emotional tone**: Maintain the emotional temperature (warm/cool/rational/emotional)
+5. **Paragraph structure**: Imitate paragraph length, transitions, and flow
+6. **Rhetorical devices**: If samples use metaphors, parallelism, rhetorical questions, use similar devices appropriately
+7. **Person and perspective**: Maintain the person (I/we/you) and narrative perspective
+8. **Rhythm and cadence**: Imitate the reading rhythm and cadence
+
+### Key Principles:
+- **Prioritize sample style**: Even if samples contain normally prohibited words, faithfully imitate them
+- **Don't innovate style**: Don't add stylistic elements not present in samples
+- **Consistency above all**: Ensure generated content is indistinguishable from the samples
+
+### Style Samples:
 ${currentStyle}
+
+### Style Imitation Instruction:
+Based on the above samples, generate new content in the **exact same style**. Your goal is to make readers unable to tell if this is AI-generated or written by the creator.
 
 --- End of Style Imitation ---
 Now, based on the above style, process this topic:`
       : '';
 
-    const prompt = `${stylePrompt}
-你是一个真实的人，在写给一个认识你的朋友看。你的文字唯一的标准是：读完之后，对方觉得「这是真话」。
-
-### 核心原则
+    const corePrinciples = language === 'CN'
+      ? `### 核心原则
 1. **用具体代替抽象**：禁用形容词，改用数字、动作和场景。
    - 错：「我压力很大。」
    - 对：「下午3点，同事从我身后走过，我下意识把电脑屏幕往下按了按。」
@@ -172,15 +195,32 @@ Now, based on the above style, process this topic:`
 3. **说一件事就够了**：找到那一个最真实的感受，把它说清楚，停下来。
 4. **结尾不要总结**：不要「所以我觉得」「希望大家」，可以是一个作者真的想知道答案的问题，或者一个自然的留白。
 
-### 禁止使用的词和句式
+### 禁止使用的词和句式（注：如果上方风格样本中包含这些词汇，可以保留以保持风格一致性）
 - 赋能/破局/内卷/深度/干货/划重点/本质上/维度/建议收藏/干货
 - 首先/其次/最后/总结一下
 - 「我们」开头
 - 「你有没有」「你是否」「希望你」「让我们一起」
-- ❗🔥✅ 任何符号装饰，禁止使用 Markdown 符号（如 **、*）。
+- ❗🔥✅ 任何符号装饰，禁止使用 Markdown 符号（如 **、*）。`
+      : `### Core Principles
+1. **Be specific**: Use numbers, actions, and scenes instead of adjectives.
+   - Wrong: "I'm under a lot of pressure."
+   - Right: "At 3 PM, a colleague walked behind me and I instinctively tilted my laptop screen down."
+2. **Show, don't tell**: Don't explain what things mean; let readers draw their own conclusions.
+   - Wrong: "This shows our generation lacks emotional expression."
+   - Right: "My mom always asks if I've eaten when she calls, never if I'm happy."
+3. **One thing is enough**: Find the one most authentic feeling, express it clearly, then stop.
+4. **No summaries**: Don't end with "so I think" or "I hope everyone." End with a genuine question the author wants answered, or a natural pause.
 
-### 参考风格 (Golden Samples)
-${currentStyle.trim() ? '（已提供个人写作风格，请优先模仿上方风格；以下样本仅作通用参考）' : '请严格参考以下两个样本当中的文字节奏、留白感和细节描写：'}
+### Words and Phrases to Avoid (Note: If the style samples above contain these, they may be retained for style consistency)
+- Buzzwords like "empower," "breakthrough," "involution," "deep dive," "dry goods," "key takeaways," "essentially," "dimensions," "save for later"
+- "First," "second," "third," "in conclusion"
+- Starting sentences with "We"
+- "Have you ever," "Do you," "I hope you," "Let's all"
+- ❗🔥✅ Any decorative symbols, no Markdown symbols (like **, *).`;
+
+    const goldenSamples = currentStyle.trim() ? '' : (language === 'CN'
+      ? `### 参考风格 (Golden Samples)
+请严格参考以下两个样本当中的文字节奏、留白感和细节描写：
 
 【样本一】
 标题一：我记了一周的情绪流水账
@@ -189,8 +229,8 @@ ${currentStyle.trim() ? '（已提供个人写作风格，请优先模仿上方�
 
 这周一，我决定开始记录情绪。
 打开手机备忘录，每次心里一沉，手指发紧，或者突然想叹口气的时候，就立刻记下来。
-“上午10:47，邮箱提示音响起，心跳快了一拍，结果是广告。”
-“下午3:30，隔壁桌的键盘声敲得特别响，我突然觉得很烦。”
+"上午10:47，邮箱提示音响起，心跳快了一拍，结果是广告。"
+"下午3:30，隔壁桌的键盘声敲得特别响，我突然觉得很烦。"
 我翻看这些密密麻麻的记录，发现报告里所有的线索，都指向同一个房间。
 我站在那个房间门口路过八十次，摸一摸门把手，又走开。
 我觉得那个房间明天该推门进去了。
@@ -202,7 +242,39 @@ ${currentStyle.trim() ? '（已提供个人写作风格，请优先模仿上方�
 他想了一下说：「我之前觉得不值。现在觉得是我花得最好的一年。那一年什么都没做，我才想明白了我在为什么做事。」
 我听完沉默了一会儿。
 因为我突然想到：「高效」和「在正确的方向上」，是两件事。我一直很在意前者，对后者的检查，少得多。
-你现在做的事，你知道为什么在做吗？不是「因为要赚钱」，是真的知道吗？
+你现在做的事，你知道为什么在做吗？不是「因为要赚钱」，是真的知道吗？`
+      : `### Reference Style (Golden Samples)
+Please strictly reference the following two samples for their rhythm, sense of pause, and detail:
+
+[Sample 1]
+Title 1: I kept an emotional log for a week
+Title 2: That week, anxiety had a fixed address
+Title 3: Turns out my worry was a squatter
+
+This Monday, I decided to start logging emotions.
+Opened my phone memo, every time my heart sank, fingers tightened, or I suddenly wanted to sigh, I'd jot it down immediately.
+"10:47 AM, email notification sound, heartbeat quickened, turned out to be spam."
+"3:30 PM, the keyboard at the next desk was typing especially loud, I suddenly felt annoyed."
+I flipped through these dense records and found all clues in the report pointed to the same room.
+I passed by that room door eighty times, touched the doorknob, then walked away.
+I think I should open that door tomorrow.
+
+[Sample 2]
+A RED note: After talking to a friend on gap year, I reconsidered what "wasting time" means.
+A friend quit his job last year, took a gap year for the whole year.
+We met last month, I asked him: "Was it worth it?"
+He thought for a moment: "I didn't think so before. Now I think it was the best year I've spent. That year I did nothing, that's how I figured out why I'm doing things."
+I fell silent for a while.
+Because I suddenly realized: "Efficient" and "in the right direction" are two different things. I've been so focused on the former, but checked the latter much less.
+What you're doing now, do you know why you're doing it? Not "to make money," but really know?`);
+
+    const prompt = `${language === 'CN' ? '你是一个真实的人，在写给一个认识你的朋友看。你的文字唯一的标准是：读完之后，对方觉得「这是真话」。' : 'You are a real person, writing to a friend who knows you. The only standard for your writing: after reading, they feel "this is true."'}
+
+${corePrinciples}
+
+${goldenSamples}
+
+${stylePrompt}
 
 ### 任务详情
 选题："""${currentIdea.content}"""
@@ -286,11 +358,13 @@ ${language === 'CN' ? `输出三个版本，版本间用「---」分隔：
           if (part3 && part3 !== t.drafts.generationFailed) updatePlatformDraft(draftId, 'youtube', part3);
         }
         
-        // Success: Increment usage
-        const today = new Date().toLocaleDateString();
-        const newCount = usageCount + 1;
-        setUsageCount(newCount);
-        localStorage.setItem(USAGE_KEY, JSON.stringify({ date: today, count: newCount }));
+        // Success: Increment usage (skip in dev mode)
+        if (localStorage.getItem('seedx_dev_mode') !== 'true') {
+          const today = new Date().toLocaleDateString();
+          const newCount = usageCount + 1;
+          setUsageCount(newCount);
+          localStorage.setItem(USAGE_KEY, JSON.stringify({ date: today, count: newCount }));
+        }
       } else {
         console.warn('Draft was deleted during generation, skipping save.');
       }
@@ -324,9 +398,16 @@ ${language === 'CN' ? `输出三个版本，版本间用「---」分隔：
 
   const handleRegenerateSection = async (sectionKey: string) => {
     if (!currentIdea || !currentDraft) return;
-    if (usageCount >= DAILY_LIMIT) {
-      alert(t.drafts.limitAlert);
-      return;
+
+    // Check developer mode
+    if (localStorage.getItem('seedx_dev_mode') === 'true') {
+      // Skip usage limit in dev mode
+    } else {
+      // Check usage limit
+      if (usageCount >= DAILY_LIMIT) {
+        alert(t.drafts.limitAlert);
+        return;
+      }
     }
 
     if (!import.meta.env.VITE_DEEPSEEK_API_KEY) {
@@ -369,19 +450,37 @@ ${language === 'CN' ? `输出三个版本，版本间用「---」分隔：
 
     const styleSection = currentStyle.trim()
       ? (language === 'CN'
-        ? `## 创作者的个人写作风格（请严格模仿）
-分析以下内容的语气、句子长度、用词习惯、情感温度、段落结构、修辞手法、节奏感和人称使用，然后用完全相同的风格生成：
+        ? `## 创作者的个人写作风格（严格模仿要求）
 
-${currentStyle}`
+请**完全模仿**以下样本的写作风格，包括语气、句子结构、词汇选择、情感基调、段落结构、修辞手法、人称和节奏。
+
+### 重要原则：
+- **优先模仿样本风格**：即使样本中包含通常禁止的词汇，也要忠实模仿
+- **不要创新风格**：不要添加样本中没有的风格元素
+- **一致性高于一切**：确保生成内容与样本风格完全一致
+
+### 风格样本：
+${currentStyle}
+
+### 风格模仿指令：
+请基于以上样本，用**完全相同的风格**生成新内容。`
         : `## Creator's Personal Writing Style (Strict Imitation Required)
-Analyze the tone, sentence length, word choice, emotional temperature, paragraph structure, rhetorical devices, rhythm, and pronoun usage. Then generate in the exact same style:
 
-${currentStyle}`)
+Please **exactly imitate** the writing style in the samples below, including tone, sentence structure, word choice, emotional tone, paragraph structure, rhetorical devices, person, and rhythm.
+
+### Key Principles:
+- **Prioritize sample style**: Even if samples contain normally prohibited words, faithfully imitate them
+- **Don't innovate style**: Don't add stylistic elements not present in samples
+- **Consistency above all**: Ensure generated content is indistinguishable from the samples
+
+### Style Samples:
+${currentStyle}
+
+### Style Imitation Instruction:
+Based on the above samples, generate new content in the **exact same style**.`)
       : '';
 
-    const prompt = `${styleSection}
-
-${refinementsText}
+    const prompt = `${refinementsText}
 ${feedbackText}
 
 ${language === 'CN'
@@ -390,13 +489,15 @@ ${language === 'CN'
 2. **不解释，只描述**：不要告诉读者这意味着什么，让他们自己得出结论。
 3. **说一件事就够了**：找到那一个最真实的感受，把它说清楚，停下来。
 4. **结尾不要总结**：不要「所以我觉得」「希望大家」。
-5. **禁止使用**：赋能/破局/内卷/干货/划重点/本质上/维度；首先/其次/最后/总结一下；「我们」开头句式；任何符号装饰或 Markdown 语法。`
+5. **禁止使用**（注：如果上方风格样本中包含这些词汇，可以保留以保持风格一致性）：赋能/破局/内卷/干货/划重点/本质上/维度；首先/其次/最后/总结一下；「我们」开头句式；任何符号装饰或 Markdown 语法。`
       : `### Core Principles
 1. **Be specific**: Use numbers, actions, and scenes.
 2. **Show, don't tell**: Let readers draw conclusions.
 3. **One thing is enough**: Find one authentic feeling.
 4. **No summaries**: No "I think" or "in conclusion".
-5. **No buzzwords**: No emojis, Markdown symbols, or clichés.`}
+5. **No buzzwords** (Note: If the style samples above contain these, they may be retained for style consistency): No emojis, Markdown symbols, or clichés.`}
+
+${styleSection}
 
 ### 任务
 选题："""${currentIdea.content}"""
@@ -452,10 +553,13 @@ ${sectionInstructions[sectionKey] || ''}
         setStyleRefinements(prev => [...prev, feedback]);
       }
 
-      const today = new Date().toLocaleDateString();
-      const newCount = usageCount + 1;
-      setUsageCount(newCount);
-      localStorage.setItem(USAGE_KEY, JSON.stringify({ date: today, count: newCount }));
+      // Increment usage (skip in dev mode)
+      if (localStorage.getItem('seedx_dev_mode') !== 'true') {
+        const today = new Date().toLocaleDateString();
+        const newCount = usageCount + 1;
+        setUsageCount(newCount);
+        localStorage.setItem(USAGE_KEY, JSON.stringify({ date: today, count: newCount }));
+      }
 
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
@@ -717,15 +821,15 @@ ${sectionInstructions[sectionKey] || ''}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', alignItems: 'flex-start' }}>
               <button
                 onClick={handleDeepen}
-                disabled={isGenerating || usageCount >= DAILY_LIMIT}
+                disabled={isGenerating || (usageCount >= DAILY_LIMIT && localStorage.getItem('seedx_dev_mode') !== 'true')}
                 className="btn-primary"
                 style={{
-                  opacity: (isGenerating || usageCount >= DAILY_LIMIT) ? 0.6 : 1,
-                  cursor: (isGenerating || usageCount >= DAILY_LIMIT) ? 'not-allowed' : 'pointer'
+                  opacity: (isGenerating || (usageCount >= DAILY_LIMIT && localStorage.getItem('seedx_dev_mode') !== 'true')) ? 0.6 : 1,
+                  cursor: (isGenerating || (usageCount >= DAILY_LIMIT && localStorage.getItem('seedx_dev_mode') !== 'true')) ? 'not-allowed' : 'pointer'
                 }}
               >
                 <Sparkles size={18} />
-                {isGenerating ? t.drafts.aiThinking : usageCount >= DAILY_LIMIT ? t.drafts.dailyLimitReached : t.drafts.aiExpand}
+                {isGenerating ? t.drafts.aiThinking : (usageCount >= DAILY_LIMIT && localStorage.getItem('seedx_dev_mode') !== 'true') ? t.drafts.dailyLimitReached : t.drafts.aiExpand}
               </button>
               
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-muted)', fontSize: '0.75rem' }}>
@@ -737,13 +841,13 @@ ${sectionInstructions[sectionKey] || ''}
                   overflow: 'hidden'
                 }}>
                   <div style={{
-                    width: `${(usageCount / DAILY_LIMIT) * 100}%`,
+                    width: `${localStorage.getItem('seedx_dev_mode') === 'true' ? Math.min(usageCount / DAILY_LIMIT, 1) * 100 : (usageCount / DAILY_LIMIT) * 100}%`,
                     height: '100%',
-                    backgroundColor: usageCount >= DAILY_LIMIT ? '#ef4444' : 'var(--accent-primary)',
+                    backgroundColor: (usageCount >= DAILY_LIMIT && localStorage.getItem('seedx_dev_mode') !== 'true') ? '#ef4444' : 'var(--accent-primary)',
                     transition: 'width 0.3s ease'
                   }} />
                 </div>
-                <span>{t.drafts.usageLimit(usageCount, DAILY_LIMIT)}</span>
+                <span>{localStorage.getItem('seedx_dev_mode') === 'true' ? (language === 'CN' ? '开发者模式：无限使用' : 'Dev Mode: Unlimited') : t.drafts.usageLimit(usageCount, DAILY_LIMIT)}</span>
               </div>
 
               {!localStorage.getItem('seedx_user_style')?.trim() && (
