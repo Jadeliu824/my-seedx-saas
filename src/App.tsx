@@ -15,6 +15,9 @@ function App() {
     return (localStorage.getItem('seedx_language') as Language) || 'EN';
   });
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [devMode, setDevMode] = useState(() => {
+    return localStorage.getItem('seedx_dev_mode') === 'true';
+  });
 
 
   useEffect(() => {
@@ -22,6 +25,7 @@ function App() {
   }, [language]);
 
   useEffect(() => {
+
     const handleResize = () => setIsMobile(window.innerWidth <= 768);
     window.addEventListener('resize', handleResize);
 
@@ -31,9 +35,16 @@ function App() {
     };
     window.addEventListener('seedx_navigate_to_style', handleNavigateToStyle);
 
+    // Listen for dev mode changes
+    const handleDevModeChanged = () => {
+      setDevMode(localStorage.getItem('seedx_dev_mode') === 'true');
+    };
+    window.addEventListener('seedx_dev_mode_changed', handleDevModeChanged);
+
     return () => {
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('seedx_navigate_to_style', handleNavigateToStyle);
+      window.removeEventListener('seedx_dev_mode_changed', handleDevModeChanged);
     };
   }, []);
 
@@ -54,18 +65,19 @@ function App() {
         flexDirection: 'column',
         overflow: 'hidden',
       }}>
-        {/* Global App Header with Language Switcher */}
+        {/* Global App Header with Language Switcher and Dev Mode Indicator */}
         <header style={{
           height: '60px',
           borderBottom: '1px solid var(--border-color)',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center',
+          justifyContent: 'space-between',
           padding: '0 2rem',
           backgroundColor: 'var(--bg-base)',
           position: 'relative',
           zIndex: 10
         }}>
+          {/* Left side - Language switcher */}
           <div style={{
             display: 'flex',
             backgroundColor: 'var(--bg-surface-hover)',
@@ -102,6 +114,31 @@ function App() {
               EN
             </button>
           </div>
+
+          {/* Right side - Dev mode indicator */}
+          {devMode && (
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              fontSize: '0.75rem',
+              fontWeight: 600,
+              color: '#10b981',
+              backgroundColor: 'rgba(16, 185, 129, 0.1)',
+              padding: '0.25rem 0.75rem',
+              borderRadius: 'var(--radius-md)',
+              border: '1px solid rgba(16, 185, 129, 0.3)',
+            }}>
+              <div style={{
+                width: '6px',
+                height: '6px',
+                borderRadius: '50%',
+                backgroundColor: '#10b981',
+                animation: 'pulse 1.5s infinite'
+              }} />
+              <span>DEV</span>
+            </div>
+          )}
         </header>
 
         <div style={{ 
@@ -122,6 +159,28 @@ function App() {
     </div>
   );
 }
+
+// Developer mode unlock function
+declare global {
+  interface Window {
+    unlockDev: (password: string) => void;
+  }
+}
+
+if (typeof window !== 'undefined') {
+  window.unlockDev = (password: string) => {
+    if (password === 'seedx0824') {
+      localStorage.setItem('seedx_dev_mode', 'true');
+      window.dispatchEvent(new Event('seedx_dev_mode_changed'));
+      console.log('%c🚀 Developer mode unlocked!', 'color: #10b981; font-weight: bold; font-size: 14px;');
+      return 'Developer mode unlocked!';
+    } else {
+      console.error('Invalid password');
+      return 'Invalid password';
+    }
+  };
+}
+
 
 export default App;
 
