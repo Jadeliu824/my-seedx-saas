@@ -136,25 +136,25 @@ export const translations = {
       seeHow: '看看怎么用',
       plans: {
         seed: {
-          name: 'Seed',
+          name: 'Free',
           desc: '适合个人灵感探索',
           price: '$0',
-          features: ['每日 3 次 AI 深化', '基础素材库存储', '简单的选题记录'],
-          btn: '开始免费使用'
+          features: ['3次/天 AI 深化', 'CN & EN mode', '基础内容生成'],
+          btn: '开始使用'
         },
         sprout: {
-          name: 'Sprout',
+          name: 'Sprout 🌱',
           desc: '针对深度创作者设计',
           price: '$19',
-          features: ['无限次 AI 深度解析', '多平台文风自动适配', '深度数据复盘分析', '优先体验 AI 新功能'],
-          btn: '立即订阅 Sprout'
+          features: ['无限次 AI 深化', '多平台风格适配', '深度数据分析', '优先体验新功能'],
+          btn: '升级 Sprout'
         },
         forest: {
-          name: 'Forest',
+          name: 'Forest 🌲',
           desc: '多账号与团队协作',
           price: '$49',
-          features: ['包含 5 个子账号', '团队灵感共享素材库', '专属客户成效经理', 'API 调用限额开放'],
-          btn: '联系团队方案'
+          features: ['包含5个子账户', '团队共享素材库', '专属成功经理', 'API 访问权限开放'],
+          btn: '升级 Forest'
         }
       },
       waitlist: {
@@ -306,25 +306,25 @@ export const translations = {
       seeHow: 'See How it Works',
       plans: {
         seed: {
-          name: 'Seed',
+          name: 'Free',
           desc: 'For individual inspiration seekers',
           price: '$0',
-          features: ['3 AI expands daily', 'Basic material storage', 'Simple idea logging'],
-          btn: 'Start for Free'
+          features: ['3 AI expands/day', 'CN & EN mode', 'Basic content generation'],
+          btn: 'Start Using'
         },
         sprout: {
-          name: 'Sprout',
+          name: 'Sprout 🌱',
           desc: 'Designed for serious creators',
           price: '$19',
-          features: ['Unlimited AI expands', 'Multi-platform style adaptation', 'Deep data analytics', 'Early access to AI features'],
-          btn: 'Subscribe to Sprout'
+          features: ['Unlimited AI expands', 'Multi-platform style adaptation', 'Deep data analytics', 'Early access to new features'],
+          btn: 'Upgrade to Sprout'
         },
         forest: {
-          name: 'Forest',
+          name: 'Forest 🌲',
           desc: 'For multi-accounts & teams',
           price: '$49',
           features: ['5 sub-accounts included', 'Team shared material library', 'Dedicated success manager', 'API access limit open'],
-          btn: 'Contact Team'
+          btn: 'Upgrade to Forest'
         }
       },
       waitlist: {

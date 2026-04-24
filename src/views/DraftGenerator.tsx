@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useWorkflow } from '../context/WorkflowContext';
 import { Sparkles, Copy, CheckCircle2, Trash2, X, Check } from 'lucide-react';
 import { translations, type Language } from '../i18n/translations';
+import { getPaddle } from '../lib/paddle';
 
 
 export function DraftGenerator({ language = 'EN', isMobile }: { language?: Language; isMobile?: boolean }) {
@@ -26,6 +27,7 @@ export function DraftGenerator({ language = 'EN', isMobile }: { language?: Langu
   
   // Usage limit state
   const [usageCount, setUsageCount] = useState(0);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
   // Regeneration state
   const [regeneratingSection, setRegeneratingSection] = useState<string | null>(null);
@@ -110,7 +112,7 @@ export function DraftGenerator({ language = 'EN', isMobile }: { language?: Langu
     } else {
       // Check usage limit
       if (usageCount >= DAILY_LIMIT) {
-        alert(t.drafts.limitAlert);
+        setShowUpgradeModal(true);
         return;
       }
     }
@@ -405,7 +407,7 @@ ${language === 'CN' ? `输出三个版本，版本间用「---」分隔：
     } else {
       // Check usage limit
       if (usageCount >= DAILY_LIMIT) {
-        alert(t.drafts.limitAlert);
+        setShowUpgradeModal(true);
         return;
       }
     }
@@ -667,6 +669,22 @@ ${sectionInstructions[sectionKey] || ''}
       </button>
     </div>
   );
+
+  const handleSproutCheckout = async () => {
+    const paddle = await getPaddle();
+    if (!paddle) return alert('Payment system initialization failed.');
+    paddle.Checkout.open({
+      items: [{ priceId: import.meta.env.VITE_PADDLE_SPROUT_PRICE_ID, quantity: 1 }]
+    });
+  };
+
+  const handleForestCheckout = async () => {
+    const paddle = await getPaddle();
+    if (!paddle) return alert('Payment system initialization failed.');
+    paddle.Checkout.open({
+      items: [{ priceId: import.meta.env.VITE_PADDLE_FOREST_PRICE_ID, quantity: 1 }]
+    });
+  };
 
   return (
     <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? '1rem' : '2rem', height: '100%' }}>
@@ -987,6 +1005,49 @@ ${sectionInstructions[sectionKey] || ''}
         )}
       </div>
 
+      {showUpgradeModal && (
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(5px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
+          <div className="glass-panel" style={{ width: '100%', maxWidth: '450px', padding: '2.5rem', position: 'relative', backgroundColor: 'var(--bg-base)', textAlign: 'center' }}>
+            <button 
+              onClick={() => setShowUpgradeModal(false)}
+              style={{ position: 'absolute', top: '1rem', right: '1rem', color: 'var(--text-secondary)' }}
+            >
+              ✕
+            </button>
+            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🌱</div>
+            <h2 style={{ fontSize: '1.5rem', marginBottom: '0.5rem', fontWeight: 700 }}>
+              {language === 'CN' ? '今日免费次数已用完' : 'Daily limit reached'}
+            </h2>
+            <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>
+              {language === 'CN' ? '升级 Sprout，无限使用 + 风格学习功能' : 'Upgrade to Sprout for unlimited usage + style learning'}
+            </p>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <button 
+                onClick={handleSproutCheckout}
+                className="btn-primary" 
+                style={{ width: '100%', justifyContent: 'center', padding: '1rem' }}
+              >
+                {language === 'CN' ? '升级 Sprout $19/月' : 'Upgrade to Sprout $19/mo'}
+              </button>
+              <button 
+                onClick={handleForestCheckout}
+                className="btn-outline" 
+                style={{ width: '100%', justifyContent: 'center', padding: '1rem' }}
+              >
+                {language === 'CN' ? '升级 Forest $49/月' : 'Upgrade to Forest $49/mo'}
+              </button>
+            </div>
+            
+            <button 
+              onClick={() => setShowUpgradeModal(false)}
+              style={{ marginTop: '1.5rem', color: 'var(--text-secondary)', fontSize: '0.875rem' }}
+            >
+              {language === 'CN' ? '明天再来' : 'Maybe tomorrow'}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

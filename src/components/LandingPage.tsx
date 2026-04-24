@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 import { translations, type Language } from '../i18n/translations';
 import { Footer } from './Footer';
+import { getPaddle } from '../lib/paddle';
 
 export function LandingPage() {
   // Landing page always defaults to English
@@ -30,6 +31,22 @@ export function LandingPage() {
     } else {
       setStatus('success');
     }
+  };
+
+  const handleSprout = async () => {
+    const paddle = await getPaddle();
+    if (!paddle) return alert('Payment system initialization failed.');
+    paddle.Checkout.open({
+      items: [{ priceId: import.meta.env.VITE_PADDLE_SPROUT_PRICE_ID, quantity: 1 }]
+    });
+  };
+
+  const handleForest = async () => {
+    const paddle = await getPaddle();
+    if (!paddle) return alert('Payment system initialization failed.');
+    paddle.Checkout.open({
+      items: [{ priceId: import.meta.env.VITE_PADDLE_FOREST_PRICE_ID, quantity: 1 }]
+    });
   };
 
   return (
@@ -186,7 +203,9 @@ export function LandingPage() {
                   <li key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem' }}>✓ {feature}</li>
                 ))}
               </ul>
-              <button onClick={() => setIsModalOpen(true)} className="btn-outline" style={{ width: '100%', justifyContent: 'center' }}>{t.plans.seed.btn}</button>
+              <Link to="/app" className="btn-outline" style={{ textDecoration: 'none', display: 'flex', width: '100%', justifyContent: 'center' }}>
+                {t.plans.seed.btn}
+              </Link>
             </div>
 
             {/* Sprout Plan */}
@@ -227,7 +246,7 @@ export function LandingPage() {
                 ))}
               </ul>
               <button 
-                onClick={() => setIsModalOpen(true)}
+                onClick={handleSprout}
                 className="btn-primary" 
                 style={{ width: '100%', justifyContent: 'center' }}
               >
@@ -250,7 +269,7 @@ export function LandingPage() {
                   <li key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem' }}>✓ {feature}</li>
                 ))}
               </ul>
-              <button onClick={() => setIsModalOpen(true)} className="btn-outline" style={{ width: '100%', justifyContent: 'center' }}>{t.plans.forest.btn}</button>
+              <button onClick={handleForest} className="btn-outline" style={{ width: '100%', justifyContent: 'center' }}>{t.plans.forest.btn}</button>
             </div>
           </div>
         </main>
