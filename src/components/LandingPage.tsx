@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 import { translations, type Language } from '../i18n/translations';
+import { Footer } from './Footer';
 
 export function LandingPage() {
   // Landing page always defaults to English
@@ -309,6 +310,8 @@ export function LandingPage() {
           </div>
         </div>
       )}
+
+      <Footer language={language} />
     </div>
   );
 }
