@@ -177,20 +177,20 @@ export function MaterialLibrary({ language = 'EN', isMobile }: { language?: 'CN'
             <button
                key={tab.id}
                onClick={() => setActiveTab(tab.id)}
-               style={{
-                 display: 'flex',
-                 alignItems: 'center',
-                 gap: '0.5rem',
-                 padding: '0.5rem 1rem',
-                 borderRadius: 'var(--radius-full)',
-                 backgroundColor: isActive ? 'var(--accent-primary)' : 'transparent',
-                 border: isActive ? '1px solid var(--accent-primary)' : '1px solid var(--border-color)',
-                 color: isActive ? '#000' : 'var(--text-secondary)',
-                 fontWeight: isActive ? 600 : 400,
-                 transition: 'var(--transition)',
-                 whiteSpace: 'nowrap',
-                 fontSize: '0.875rem'
-               }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  padding: '0.5rem 1.125rem',
+                  borderRadius: '100px',
+                  backgroundColor: isActive ? 'var(--accent-primary)' : 'rgba(255,255,255,0.03)',
+                  border: isActive ? '1px solid var(--accent-primary)' : '1px solid var(--border-color)',
+                  color: isActive ? '#000' : 'var(--text-secondary)',
+                  fontWeight: isActive ? 600 : 500,
+                  transition: 'var(--transition)',
+                  whiteSpace: 'nowrap',
+                  fontSize: '0.8125rem'
+                }}
             >
               {Icon && <Icon size={14} />}
               {tab.label}
@@ -203,23 +203,37 @@ export function MaterialLibrary({ language = 'EN', isMobile }: { language?: 'CN'
       <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem', overflowY: 'auto', paddingBottom: '2rem' }}>
         {filteredMaterials.map(mat => (
           <div key={mat.id} className="section-card" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ 
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: '0.5rem'
+            }}>
               <span style={{ 
                 fontSize: '0.7rem', 
                 textTransform: 'uppercase', 
                 letterSpacing: '0.05em',
                 color: 'var(--accent-primary)',
-                fontWeight: 600,
-                backgroundColor: 'rgba(255, 183, 235, 0.1)',
-                padding: '0.2rem 0.5rem',
-                borderRadius: '4px'
+                fontWeight: 700,
+                backgroundColor: 'rgba(255, 183, 235, 0.12)',
+                padding: '0.25rem 0.625rem',
+                borderRadius: '100px',
+                border: '1px solid rgba(255, 183, 235, 0.1)'
               }}>
                 {tabs.find(t => t.id === mat.type)?.label}
               </span>
               {mat.tags && mat.tags.length > 0 && (
-                <div style={{ display: 'flex', gap: '0.25rem', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                <div style={{ display: 'flex', gap: '0.375rem', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
                   {mat.tags.map(tag => (
-                    <span key={tag} style={{ fontSize: '0.65rem', padding: '0.1rem 0.4rem', backgroundColor: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-color)', borderRadius: '4px', color: 'var(--text-secondary)' }}>
+                    <span key={tag} style={{ 
+                      fontSize: '0.65rem', 
+                      padding: '0.125rem 0.5rem', 
+                      backgroundColor: 'rgba(255,255,255,0.03)', 
+                      border: '1px solid var(--border-color)', 
+                      borderRadius: '100px', 
+                      color: 'var(--text-muted)' 
+                    }}>
                       #{tag}
                     </span>
                   ))}
