@@ -99,7 +99,9 @@ export function MaterialLibrary({ language = 'EN', isMobile }: { language?: 'CN'
             position: 'relative',
             backgroundColor: 'var(--bg-surface)',
             border: '1px solid var(--border-color)',
-            boxShadow: '0 20px 50px rgba(0,0,0,0.5)'
+            boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
+            maxHeight: '90vh',
+            overflowY: 'auto'
           }}>
             <h3 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '1.5rem' }}>{t.materials.addNew}</h3>
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>

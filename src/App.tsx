@@ -52,7 +52,9 @@ function App() {
     <div style={{ 
       display: 'flex', 
       flexDirection: isMobile ? 'column' : 'row',
+      height: '100vh', 
       width: '100vw', 
+      overflow: 'hidden',
       backgroundColor: 'var(--bg-base)'
     }}>
       <Sidebar currentView={currentView} onViewChange={setCurrentView} language={language} isMobile={isMobile} />
