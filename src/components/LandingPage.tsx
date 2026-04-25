@@ -126,7 +126,6 @@ export function LandingPage() {
 
         {/* Navigation Links */}
         <div 
-          className="hide-on-mobile"
           style={{ 
             display: 'flex',
             alignItems: 'center',
@@ -152,16 +151,19 @@ export function LandingPage() {
             Pricing
           </button>
           
-          <Link to="/app" style={{ 
-            textDecoration: 'none', 
-            color: 'var(--text-secondary)', 
-            fontWeight: 500, 
-            fontSize: '0.875rem',
-            transition: 'var(--transition)',
-            display: 'flex',
-            alignItems: 'center',
-            whiteSpace: 'nowrap'
-          }}>
+          <Link to="/app" 
+            className="hide-on-mobile"
+            style={{ 
+              textDecoration: 'none', 
+              color: 'var(--text-secondary)', 
+              fontWeight: 500, 
+              fontSize: '0.875rem',
+              transition: 'var(--transition)',
+              display: 'flex',
+              alignItems: 'center',
+              whiteSpace: 'nowrap'
+            }}
+          >
             {t.demo}
           </Link>
         </div>
@@ -211,7 +213,7 @@ export function LandingPage() {
             </button>
             <Link 
               to="/app" 
-              className="btn-outline hide-on-mobile" 
+              className="btn-outline" 
               style={{ textDecoration: 'none', padding: '0.875rem 2.5rem', fontSize: '1rem' }}
             >
               {t.seeHow}
