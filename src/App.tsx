@@ -52,9 +52,7 @@ function App() {
     <div style={{ 
       display: 'flex', 
       flexDirection: isMobile ? 'column' : 'row',
-      height: '100vh', 
       width: '100vw', 
-      overflow: 'hidden',
       backgroundColor: 'var(--bg-base)'
     }}>
       <Sidebar currentView={currentView} onViewChange={setCurrentView} language={language} isMobile={isMobile} />
@@ -151,7 +149,7 @@ function App() {
           paddingBottom: isMobile ? 'calc(var(--nav-height) + var(--safe-area-bottom) + 2rem)' : 'var(--page-padding)',
           WebkitOverflowScrolling: 'touch'
         }}>
-          <div style={{ maxWidth: '1000px', margin: '0 auto', height: '100%', display: 'flex', flexDirection: 'column' }} className="view-enter">
+          <div style={{ maxWidth: '1000px', margin: '0 auto', display: 'flex', flexDirection: 'column', minHeight: '100%' }} className="view-enter">
             {currentView === 'inbox' && <IdeaInbox language={language} isMobile={isMobile} />}
             {currentView === 'drafts' && <DraftGenerator language={language} isMobile={isMobile} />}
             {currentView === 'style' && <StyleView language={language} isMobile={isMobile} />}

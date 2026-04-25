@@ -242,7 +242,13 @@ export function MaterialLibrary({ language = 'EN', isMobile }: { language?: 'CN'
             </div>
             
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem' }}>
-              <h3 style={{ fontSize: '1.05rem', fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.4 }}>{mat.title}</h3>
+              <h3 style={{ 
+                fontSize: '1.05rem', 
+                fontWeight: 600, 
+                color: 'var(--text-primary)', 
+                lineHeight: 1.4,
+                wordBreak: 'break-word'
+              }}>{mat.title}</h3>
               {deletingMatId === mat.id ? (
                 <div style={{ display: 'flex', gap: '0.25rem' }}>
                   <button
@@ -304,7 +310,17 @@ export function MaterialLibrary({ language = 'EN', isMobile }: { language?: 'CN'
               )}
             </div>
             
-            <p className="text-muted" style={{ fontSize: '0.875rem', lineHeight: 1.6, flex: 1, display: '-webkit-box', WebkitLineClamp: 4, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+            <p className="text-muted" style={{ 
+              fontSize: '0.875rem', 
+              lineHeight: 1.6, 
+              flex: 1, 
+              display: '-webkit-box', 
+              WebkitLineClamp: 4, 
+              WebkitBoxOrient: 'vertical', 
+              overflow: 'hidden',
+              wordBreak: 'break-word',
+              whiteSpace: 'pre-wrap'
+            }}>
               {mat.content}
             </p>
           </div>
