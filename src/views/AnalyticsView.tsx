@@ -49,7 +49,15 @@ export function AnalyticsView({ language = 'EN', isMobile }: { language?: 'CN' |
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             {publishedIdeas.map(idea => (
-              <div key={idea.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '1rem', borderBottom: '1px solid var(--border-color)', flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? '0.75rem' : '0', alignItems: isMobile ? 'flex-start' : 'center' }}>
+              <div key={idea.id} style={{ 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                paddingBottom: '1rem', 
+                borderBottom: '1px solid var(--border-color)', 
+                flexDirection: isMobile ? 'column' : 'row', 
+                gap: isMobile ? '0.75rem' : '0', 
+                alignItems: isMobile ? 'flex-start' : 'center' 
+              }}>
                 <div>
                   <h4 style={{ fontWeight: 500, marginBottom: '0.25rem', color: 'var(--text-primary)' }}>{idea.content.slice(0, 40)}{idea.content.length > 40 ? '...' : ''}</h4>
                   <span className="text-muted" style={{ fontSize: '0.8rem' }}>{t.analytics.publishedAt}{new Date().toLocaleDateString()}</span>

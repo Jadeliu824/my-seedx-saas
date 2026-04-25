@@ -209,7 +209,11 @@ export function LandingPage() {
             >
               {t.cta}
             </button>
-            <Link to="/app" className="btn-outline" style={{ textDecoration: 'none', padding: '0.875rem 2.5rem', fontSize: '1rem' }}>
+            <Link 
+              to="/app" 
+              className="btn-outline hide-on-mobile" 
+              style={{ textDecoration: 'none', padding: '0.875rem 2.5rem', fontSize: '1rem' }}
+            >
               {t.seeHow}
             </Link>
           </div>
