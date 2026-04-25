@@ -25,20 +25,7 @@ export function Sidebar({ currentView, onViewChange, language = 'EN', isMobile }
 
   if (isMobile) {
     return (
-      <nav style={{
-        position: 'fixed',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        height: 'var(--nav-height)',
-        backgroundColor: 'var(--bg-surface)',
-        borderTop: '1px solid var(--border-color)',
-        display: 'flex',
-        justifyContent: 'space-around',
-        alignItems: 'center',
-        padding: '0 0.5rem',
-        zIndex: 1000
-      }}>
+      <nav className="mobile-nav">
         {navItems.map(item => {
           const Icon = item.icon;
           const isActive = currentView === item.id;
@@ -46,57 +33,55 @@ export function Sidebar({ currentView, onViewChange, language = 'EN', isMobile }
             <button
               key={item.id}
               onClick={() => onViewChange(item.id)}
+              className={`mobile-nav-item${isActive ? ' active' : ''}`}
               style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: '0.25rem',
-                flex: 1,
-                padding: '0.5rem 0',
-                color: isActive ? 'var(--accent-primary)' : 'var(--text-secondary)',
-                transition: 'var(--transition)'
+                WebkitTapHighlightColor: 'transparent',
+                outline: 'none'
               }}
             >
-              <Icon size={20} />
-              <span style={{ fontSize: '0.625rem', fontWeight: isActive ? 600 : 400 }}>{item.label}</span>
+              <span className="nav-icon-wrap">
+                <Icon size={22} strokeWidth={isActive ? 2.5 : 1.8} />
+              </span>
+              <span className="nav-label" style={{ 
+                fontSize: '11px',
+                marginTop: '2px',
+                opacity: isActive ? 1 : 0.7
+              }}>
+                {item.label}
+              </span>
             </button>
           );
         })}
         {user ? (
-          <button 
+          <button
             onClick={logout}
-            style={{ 
-              display: 'flex', 
-              flexDirection: 'column', 
-              alignItems: 'center', 
-              gap: '0.25rem', 
-              flex: 1,
-              color: 'var(--text-secondary)'
-            }}
+            className="mobile-nav-item"
+            style={{ position: 'relative' }}
           >
-            <img 
-              src={user.photoURL || ''} 
-              alt="me" 
-              style={{ width: 20, height: 20, borderRadius: '50%' }} 
-              onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none' }}
-            />
-            {!user.photoURL && <User size={20} />}
-            <span style={{ fontSize: '0.625rem' }}>{t.sidebar.logout}</span>
+            <span className="nav-icon-wrap" style={{ overflow: 'visible' }}>
+              {user.photoURL ? (
+                <img
+                  src={user.photoURL}
+                  alt="avatar"
+                  style={{ width: 24, height: 24, borderRadius: '50%', objectFit: 'cover', border: '1.5px solid var(--border-color)' }}
+                  onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+                />
+              ) : (
+                <User size={20} strokeWidth={1.8} />
+              )}
+            </span>
+            <span className="nav-label">{t.sidebar.logout}</span>
           </button>
         ) : (
-          <button 
+          <button
             onClick={loginWithGoogle}
-            style={{ 
-              display: 'flex', 
-              flexDirection: 'column', 
-              alignItems: 'center', 
-              gap: '0.25rem', 
-              flex: 1,
-              color: 'var(--accent-primary)'
-            }}
+            className="mobile-nav-item"
+            style={{ color: 'var(--accent-primary)' }}
           >
-            <User size={20} />
-            <span style={{ fontSize: '0.625rem' }}>{t.sidebar.login}</span>
+            <span className="nav-icon-wrap" style={{ background: 'rgba(255,183,235,0.12)' }}>
+              <User size={20} strokeWidth={1.8} />
+            </span>
+            <span className="nav-label" style={{ color: 'var(--accent-primary)' }}>{t.sidebar.login}</span>
           </button>
         )}
       </nav>

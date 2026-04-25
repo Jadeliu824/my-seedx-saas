@@ -636,34 +636,30 @@ ${sectionInstructions[sectionKey] || ''}
   };
 
   const renderSectionButtons = (sectionKey: string, content: string) => (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-      <button
-        onClick={() => addToStyle(content)}
-        title={t.drafts.styleAdded}
-        style={{ color: 'var(--accent-primary)', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.875rem' }}
-      >
-        <Sparkles size={16} />
-        {t.drafts.styleAdded}
-      </button>
+    <div className="section-card-actions">
       <button
         onClick={() => copyToClipboard(content, sectionKey)}
-        style={{ color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.875rem' }}
+        className="action-btn action-btn-ghost"
+        title={t.common.copy}
       >
-        {copiedSection === sectionKey ? <><CheckCircle2 size={16} color="#10b981"/> {t.common.copied}</> : <><Copy size={16} /> {t.common.copy}</>}
+        {copiedSection === sectionKey 
+          ? <><CheckCircle2 size={14} color="#10b981"/><span style={{color:'#10b981'}}>{t.common.copied}</span></>
+          : <><Copy size={14} />{t.common.copy}</>
+        }
+      </button>
+      <button
+        onClick={() => addToStyle(content)}
+        className="action-btn action-btn-accent"
+        title={t.drafts.styleAdded}
+      >
+        <Sparkles size={14} />
+        {language === 'CN' ? '存风格' : 'Style'}
       </button>
       <button
         onClick={() => setRegeneratingSection(sectionKey)}
         disabled={isGenerating}
-        style={{
-          color: 'var(--accent-primary)',
-          fontSize: '0.75rem',
-          fontWeight: 600,
-          padding: '0.25rem 0.5rem',
-          borderRadius: 'var(--radius-sm)',
-          border: '1px solid var(--accent-primary)',
-          opacity: isGenerating ? 0.5 : 1,
-          cursor: isGenerating ? 'not-allowed' : 'pointer'
-        }}
+        className="action-btn action-btn-outline"
+        style={{ opacity: isGenerating ? 0.5 : 1, cursor: isGenerating ? 'not-allowed' : 'pointer' }}
       >
         {t.drafts.regenerate}
       </button>
@@ -673,152 +669,208 @@ ${sectionInstructions[sectionKey] || ''}
   const handleSproutCheckout = async () => {
     const paddle = await getPaddle();
     if (!paddle) return alert('Payment system initialization failed.');
-    paddle.Checkout.open({
-      items: [{ priceId: import.meta.env.VITE_PADDLE_SPROUT_PRICE_ID, quantity: 1 }]
-    });
+    try {
+      await paddle.Checkout.open({
+        items: [{ priceId: import.meta.env.VITE_PADDLE_SPROUT_PRICE_ID, quantity: 1 }]
+      });
+    } catch (err) {
+      console.error('[Checkout] Sprout error:', err);
+      alert('Checkout failed. Please check the console for details and ensure your domain is allowlisted in Paddle settings.');
+    }
   };
 
   const handleForestCheckout = async () => {
     const paddle = await getPaddle();
     if (!paddle) return alert('Payment system initialization failed.');
-    paddle.Checkout.open({
-      items: [{ priceId: import.meta.env.VITE_PADDLE_FOREST_PRICE_ID, quantity: 1 }]
-    });
+    try {
+      await paddle.Checkout.open({
+        items: [{ priceId: import.meta.env.VITE_PADDLE_FOREST_PRICE_ID, quantity: 1 }]
+      });
+    } catch (err) {
+      console.error('[Checkout] Forest error:', err);
+      alert('Checkout failed. Please check the console for details and ensure your domain is allowlisted in Paddle settings.');
+    }
   };
 
   return (
     <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? '1rem' : '2rem', height: '100%' }}>
-      {/* Left Sidebar: List of Drafts */}
+      {/* Left Sidebar / Mobile top strip: List of Drafts */}
       <div style={{ 
         width: isMobile ? '100%' : '300px', 
         display: 'flex', 
         flexDirection: 'column', 
-        gap: '1rem', 
+        gap: isMobile ? '0.75rem' : '1rem', 
         borderRight: isMobile ? 'none' : '1px solid var(--border-color)', 
         borderBottom: isMobile ? '1px solid var(--border-color)' : 'none',
         paddingRight: isMobile ? '0' : '1rem',
-        paddingBottom: isMobile ? '1rem' : '0'
+        paddingBottom: isMobile ? '0.75rem' : '0',
+        flexShrink: 0
       }}>
-        <div style={{ paddingBottom: '1rem', borderBottom: '1px solid var(--border-color)' }}>
-          <h2 style={{ fontSize: '1.25rem', fontWeight: 600 }}>{t.drafts.title}</h2>
-          <p className="text-muted" style={{ fontSize: '0.875rem' }}>{t.drafts.totalDrafts(drafts.length)}</p>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <h2 style={{ fontSize: isMobile ? '1rem' : '1.25rem', fontWeight: 600 }}>{t.drafts.title}</h2>
+            <p className="text-muted" style={{ fontSize: '0.75rem' }}>{t.drafts.totalDrafts(drafts.length)}</p>
+          </div>
         </div>
         
-        <div style={{ overflowY: 'auto', flex: 1 }}>
-          {drafts.length === 0 ? (
-            <p className="text-muted" style={{ textAlign: 'center', marginTop: '2rem' }}>{t.drafts.noDrafts}</p>
-          ) : (
-            drafts.map(draft => (
-              <div 
-                key={draft.id} 
-                onClick={() => handleSelectDraft(draft.id)}
-                style={{
-                  padding: '1rem',
-                  borderRadius: 'var(--radius-md)',
-                  backgroundColor: selectedDraftId === draft.id ? 'var(--bg-surface-hover)' : 'transparent',
-                  cursor: 'pointer',
-                  border: '1px solid',
-                  borderColor: selectedDraftId === draft.id ? 'var(--accent-primary)' : 'var(--border-color)',
-                  marginBottom: '0.5rem',
-                  transition: 'var(--transition)',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  gap: '0.5rem'
-                }}
-              >
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <h4 style={{ 
-                    fontSize: '0.875rem', 
-                    fontWeight: 500, 
-                    marginBottom: '0.25rem',
+        {/* Mobile: horizontal scroll chips; Desktop: vertical list */}
+        {isMobile ? (
+          <div style={{ 
+            display: 'flex',
+            gap: '0.5rem',
+            overflowX: 'auto',
+            paddingBottom: '0.25rem',
+            WebkitOverflowScrolling: 'touch',
+            scrollbarWidth: 'none'
+          }}>
+            {drafts.length === 0 ? (
+              <p className="text-muted" style={{ fontSize: '0.8rem', padding: '0.25rem 0' }}>{t.drafts.noDrafts}</p>
+            ) : (
+              drafts.map(draft => (
+                <button
+                  key={draft.id}
+                  onClick={() => handleSelectDraft(draft.id)}
+                  style={{
+                    flexShrink: 0,
+                    padding: '0.5rem 0.875rem',
+                    borderRadius: '100px',
+                    border: '1px solid',
+                    borderColor: selectedDraftId === draft.id ? 'var(--accent-primary)' : 'rgba(255,255,255,0.05)',
+                    backgroundColor: selectedDraftId === draft.id ? 'rgba(255,183,235,0.12)' : 'rgba(255,255,255,0.03)',
+                    color: selectedDraftId === draft.id ? 'var(--accent-primary)' : 'var(--text-secondary)',
+                    fontSize: '0.8125rem',
+                    fontWeight: selectedDraftId === draft.id ? 600 : 500,
+                    transition: 'var(--transition)',
+                    whiteSpace: 'nowrap',
+                    cursor: 'pointer',
+                    maxWidth: '200px',
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap'
-                  }}>
-                    {draft.title || t.common.untitled}
-                  </h4>
-                  <p className="text-muted" style={{ fontSize: '0.75rem' }}>
-                    {new Date(draft.createdAt).toLocaleDateString()}
-                  </p>
-                </div>
-                {deletingDraftId === draft.id ? (
-                  <div style={{ display: 'flex', gap: '0.25rem' }}>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        deleteDraft(draft.id);
-                        if (selectedDraftId === draft.id) {
-                          setSelectedDraftId(null);
-                        }
-                        setDeletingDraftId(null);
-                      }}
-                      style={{
-                        padding: '0.4rem',
-                        borderRadius: 'var(--radius-sm)',
-                        backgroundColor: 'rgba(34, 197, 94, 0.1)',
-                        color: '#22c55e',
-                        border: 'none',
-                        cursor: 'pointer'
-                      }}
-                      title={t.drafts.confirmDelete}
-                    >
-                      <Check size={16} />
-                    </button>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setDeletingDraftId(null);
-                      }}
-                      style={{
-                        padding: '0.4rem',
-                        borderRadius: 'var(--radius-sm)',
-                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                        color: '#ef4444',
-                        border: 'none',
-                        cursor: 'pointer'
-                      }}
-                      title={t.common.cancel}
-                    >
-                      <X size={16} />
-                    </button>
+                    boxShadow: selectedDraftId === draft.id ? '0 4px 12px rgba(255,183,235,0.15)' : 'none'
+                  }}
+                >
+                  {draft.title || t.common.untitled}
+                </button>
+              ))
+            )}
+          </div>
+        ) : (
+          <div style={{ overflowY: 'auto', flex: 1 }}>
+            {drafts.length === 0 ? (
+              <p className="text-muted" style={{ textAlign: 'center', marginTop: '2rem' }}>{t.drafts.noDrafts}</p>
+            ) : (
+              drafts.map(draft => (
+                <div 
+                  key={draft.id} 
+                  onClick={() => handleSelectDraft(draft.id)}
+                  style={{
+                    padding: '1rem',
+                    borderRadius: 'var(--radius-md)',
+                    backgroundColor: selectedDraftId === draft.id ? 'var(--bg-surface-hover)' : 'transparent',
+                    cursor: 'pointer',
+                    border: '1px solid',
+                    borderColor: selectedDraftId === draft.id ? 'var(--accent-primary)' : 'var(--border-color)',
+                    marginBottom: '0.5rem',
+                    transition: 'var(--transition)',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    gap: '0.5rem'
+                  }}
+                >
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <h4 style={{ 
+                      fontSize: '0.875rem', 
+                      fontWeight: 500, 
+                      marginBottom: '0.25rem',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap'
+                    }}>
+                      {draft.title || t.common.untitled}
+                    </h4>
+                    <p className="text-muted" style={{ fontSize: '0.75rem' }}>
+                      {new Date(draft.createdAt).toLocaleDateString()}
+                    </p>
                   </div>
-                ) : (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setDeletingDraftId(draft.id);
-                    }}
-                    style={{
-                      padding: '0.4rem',
-                      borderRadius: 'var(--radius-sm)',
-                      transition: 'var(--transition)',
-                      cursor: 'pointer',
-                      backgroundColor: 'transparent',
-                      border: '1px solid transparent',
-                      color: 'var(--text-secondary)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      flexShrink: 0
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.color = '#ef4444';
-                      e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.color = 'var(--text-secondary)';
-                      e.currentTarget.style.backgroundColor = 'transparent';
-                    }}
-                    title={t.drafts.deleteDraft}
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                )}
-              </div>
-            ))
-          )}
-        </div>
+                  {deletingDraftId === draft.id ? (
+                    <div style={{ display: 'flex', gap: '0.25rem' }}>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          deleteDraft(draft.id);
+                          if (selectedDraftId === draft.id) {
+                            setSelectedDraftId(null);
+                          }
+                          setDeletingDraftId(null);
+                        }}
+                        style={{
+                          padding: '0.4rem',
+                          borderRadius: 'var(--radius-sm)',
+                          backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                          color: '#22c55e',
+                          border: 'none',
+                          cursor: 'pointer'
+                        }}
+                        title={t.drafts.confirmDelete}
+                      >
+                        <Check size={16} />
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDeletingDraftId(null);
+                        }}
+                        style={{
+                          padding: '0.4rem',
+                          borderRadius: 'var(--radius-sm)',
+                          backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                          color: '#ef4444',
+                          border: 'none',
+                          cursor: 'pointer'
+                        }}
+                        title={t.common.cancel}
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setDeletingDraftId(draft.id);
+                      }}
+                      style={{
+                        padding: '0.4rem',
+                        borderRadius: 'var(--radius-sm)',
+                        transition: 'var(--transition)',
+                        cursor: 'pointer',
+                        backgroundColor: 'transparent',
+                        border: '1px solid transparent',
+                        color: 'var(--text-secondary)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.color = '#ef4444';
+                        e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.color = 'var(--text-secondary)';
+                        e.currentTarget.style.backgroundColor = 'transparent';
+                      }}
+                      title={t.drafts.deleteDraft}
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  )}
+                </div>
+              ))
+            )}
+          </div>
+        )}
       </div>
 
       {/* Right Content Area: Deepen Workflow */}
@@ -843,7 +895,9 @@ ${sectionInstructions[sectionKey] || ''}
                 className="btn-primary"
                 style={{
                   opacity: (isGenerating || (usageCount >= DAILY_LIMIT && localStorage.getItem('seedx_dev_mode') !== 'true')) ? 0.6 : 1,
-                  cursor: (isGenerating || (usageCount >= DAILY_LIMIT && localStorage.getItem('seedx_dev_mode') !== 'true')) ? 'not-allowed' : 'pointer'
+                  cursor: (isGenerating || (usageCount >= DAILY_LIMIT && localStorage.getItem('seedx_dev_mode') !== 'true')) ? 'not-allowed' : 'pointer',
+                  width: isMobile ? '100%' : 'auto',
+                  justifyContent: isMobile ? 'center' : 'flex-start'
                 }}
               >
                 <Sparkles size={18} />
@@ -912,39 +966,39 @@ ${sectionInstructions[sectionKey] || ''}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
                 {generatedResults.xiaohongshu && (
-                  <div style={{ border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', borderBottom: '1px solid var(--border-color)', backgroundColor: 'var(--bg-surface-hover)' }}>
-                      <h4 style={{ fontWeight: 600 }}>{t.drafts.platforms.xiaohongshu}</h4>
+                  <div className="section-card">
+                    <div className="section-card-header">
+                      <h4 style={{ fontWeight: 600, fontSize: '0.875rem' }}>{t.drafts.platforms.xiaohongshu}</h4>
                       {renderSectionButtons('xiaohongshu', generatedResults.xiaohongshu)}
                     </div>
                     {renderFeedbackArea('xiaohongshu')}
-                    <div style={{ padding: '1rem', whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>
+                    <div style={{ padding: '1rem', whiteSpace: 'pre-wrap', lineHeight: 1.7, fontSize: '0.9375rem' }}>
                       {generatedResults.xiaohongshu}
                     </div>
                   </div>
                 )}
 
                 {generatedResults.chineseTweet && (
-                  <div style={{ border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', borderBottom: '1px solid var(--border-color)', backgroundColor: 'var(--bg-surface-hover)' }}>
-                      <h4 style={{ fontWeight: 600 }}>{t.drafts.platforms.twitter_cn}</h4>
+                  <div className="section-card">
+                    <div className="section-card-header">
+                      <h4 style={{ fontWeight: 600, fontSize: '0.875rem' }}>{t.drafts.platforms.twitter_cn}</h4>
                       {renderSectionButtons('chineseTweet', generatedResults.chineseTweet)}
                     </div>
                     {renderFeedbackArea('chineseTweet')}
-                    <div style={{ padding: '1rem', whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>
+                    <div style={{ padding: '1rem', whiteSpace: 'pre-wrap', lineHeight: 1.7, fontSize: '0.9375rem' }}>
                       {generatedResults.chineseTweet}
                     </div>
                   </div>
                 )}
 
                 {generatedResults.douyinScript && (
-                  <div style={{ border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', borderBottom: '1px solid var(--border-color)', backgroundColor: 'var(--bg-surface-hover)' }}>
-                      <h4 style={{ fontWeight: 600 }}>{t.drafts.platforms.douyin}</h4>
+                  <div className="section-card">
+                    <div className="section-card-header">
+                      <h4 style={{ fontWeight: 600, fontSize: '0.875rem' }}>{t.drafts.platforms.douyin}</h4>
                       {renderSectionButtons('douyinScript', generatedResults.douyinScript)}
                     </div>
                     {renderFeedbackArea('douyinScript')}
-                    <div style={{ padding: '1rem', whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>
+                    <div style={{ padding: '1rem', whiteSpace: 'pre-wrap', lineHeight: 1.7, fontSize: '0.9375rem' }}>
                       {generatedResults.douyinScript}
                     </div>
                   </div>
@@ -957,39 +1011,39 @@ ${sectionInstructions[sectionKey] || ''}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
                 {generatedResults.englishTweet && (
-                  <div style={{ border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', borderBottom: '1px solid var(--border-color)', backgroundColor: 'var(--bg-surface-hover)' }}>
-                      <h4 style={{ fontWeight: 600 }}>{t.drafts.platforms.twitter_en}</h4>
+                  <div className="section-card">
+                    <div className="section-card-header">
+                      <h4 style={{ fontWeight: 600, fontSize: '0.875rem' }}>{t.drafts.platforms.twitter_en}</h4>
                       {renderSectionButtons('englishTweet', generatedResults.englishTweet)}
                     </div>
                     {renderFeedbackArea('englishTweet')}
-                    <div style={{ padding: '1rem', whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>
+                    <div style={{ padding: '1rem', whiteSpace: 'pre-wrap', lineHeight: 1.7, fontSize: '0.9375rem' }}>
                       {generatedResults.englishTweet}
                     </div>
                   </div>
                 )}
 
                 {generatedResults.linkedinPost && (
-                  <div style={{ border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', borderBottom: '1px solid var(--border-color)', backgroundColor: 'var(--bg-surface-hover)' }}>
-                      <h4 style={{ fontWeight: 600 }}>{t.drafts.platforms.linkedin}</h4>
+                  <div className="section-card">
+                    <div className="section-card-header">
+                      <h4 style={{ fontWeight: 600, fontSize: '0.875rem' }}>{t.drafts.platforms.linkedin}</h4>
                       {renderSectionButtons('linkedinPost', generatedResults.linkedinPost)}
                     </div>
                     {renderFeedbackArea('linkedinPost')}
-                    <div style={{ padding: '1rem', whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>
+                    <div style={{ padding: '1rem', whiteSpace: 'pre-wrap', lineHeight: 1.7, fontSize: '0.9375rem' }}>
                       {generatedResults.linkedinPost}
                     </div>
                   </div>
                 )}
 
                 {generatedResults.youtubeScript && (
-                  <div style={{ border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', borderBottom: '1px solid var(--border-color)', backgroundColor: 'var(--bg-surface-hover)' }}>
-                      <h4 style={{ fontWeight: 600 }}>{t.drafts.platforms.youtube}</h4>
+                  <div className="section-card">
+                    <div className="section-card-header">
+                      <h4 style={{ fontWeight: 600, fontSize: '0.875rem' }}>{t.drafts.platforms.youtube}</h4>
                       {renderSectionButtons('youtubeScript', generatedResults.youtubeScript)}
                     </div>
                     {renderFeedbackArea('youtubeScript')}
-                    <div style={{ padding: '1rem', whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>
+                    <div style={{ padding: '1rem', whiteSpace: 'pre-wrap', lineHeight: 1.7, fontSize: '0.9375rem' }}>
                       {generatedResults.youtubeScript}
                     </div>
                   </div>
@@ -1006,34 +1060,65 @@ ${sectionInstructions[sectionKey] || ''}
       </div>
 
       {showUpgradeModal && (
-        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(5px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
-          <div className="glass-panel" style={{ width: '100%', maxWidth: '450px', padding: '2.5rem', position: 'relative', backgroundColor: 'var(--bg-base)', textAlign: 'center' }}>
+        <div style={{ 
+          position: 'fixed', 
+          inset: 0, 
+          backgroundColor: 'rgba(0,0,0,0.8)', 
+          backdropFilter: 'blur(8px)', 
+          WebkitBackdropFilter: 'blur(8px)',
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center', 
+          zIndex: 200,
+          padding: '1.25rem'
+        }}>
+          <div className="glass-panel" style={{ 
+            width: '100%', 
+            maxWidth: '420px', 
+            padding: isMobile ? '1.75rem 1.25rem' : '2.5rem', 
+            position: 'relative', 
+            backgroundColor: '#0d0d0d', 
+            textAlign: 'center',
+            borderColor: '#2a2a2a'
+          }}>
             <button 
               onClick={() => setShowUpgradeModal(false)}
-              style={{ position: 'absolute', top: '1rem', right: '1rem', color: 'var(--text-secondary)' }}
+              style={{ 
+                position: 'absolute', 
+                top: '0.875rem', 
+                right: '0.875rem', 
+                color: 'var(--text-secondary)',
+                width: 28,
+                height: 28,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: '50%',
+                fontSize: '1rem'
+              }}
             >
               ✕
             </button>
-            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🌱</div>
-            <h2 style={{ fontSize: '1.5rem', marginBottom: '0.5rem', fontWeight: 700 }}>
+            <div style={{ fontSize: '2.5rem', marginBottom: '0.875rem' }}>🌱</div>
+            <h2 style={{ fontSize: isMobile ? '1.25rem' : '1.5rem', marginBottom: '0.5rem', fontWeight: 700 }}>
               {language === 'CN' ? '今日免费次数已用完' : 'Daily limit reached'}
             </h2>
-            <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>
+            <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', fontSize: '0.9rem', lineHeight: 1.6 }}>
               {language === 'CN' ? '升级 Sprout，无限使用 + 风格学习功能' : 'Upgrade to Sprout for unlimited usage + style learning'}
             </p>
             
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
               <button 
                 onClick={handleSproutCheckout}
                 className="btn-primary" 
-                style={{ width: '100%', justifyContent: 'center', padding: '1rem' }}
+                style={{ width: '100%', justifyContent: 'center', padding: '0.875rem' }}
               >
                 {language === 'CN' ? '升级 Sprout $19/月' : 'Upgrade to Sprout $19/mo'}
               </button>
               <button 
                 onClick={handleForestCheckout}
                 className="btn-outline" 
-                style={{ width: '100%', justifyContent: 'center', padding: '1rem' }}
+                style={{ width: '100%', justifyContent: 'center', padding: '0.875rem' }}
               >
                 {language === 'CN' ? '升级 Forest $49/月' : 'Upgrade to Forest $49/mo'}
               </button>
@@ -1041,7 +1126,7 @@ ${sectionInstructions[sectionKey] || ''}
             
             <button 
               onClick={() => setShowUpgradeModal(false)}
-              style={{ marginTop: '1.5rem', color: 'var(--text-secondary)', fontSize: '0.875rem' }}
+              style={{ marginTop: '1.25rem', color: 'var(--text-secondary)', fontSize: '0.875rem' }}
             >
               {language === 'CN' ? '明天再来' : 'Maybe tomorrow'}
             </button>

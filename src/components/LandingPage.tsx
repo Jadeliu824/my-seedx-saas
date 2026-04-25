@@ -36,17 +36,27 @@ export function LandingPage() {
   const handleSprout = async () => {
     const paddle = await getPaddle();
     if (!paddle) return alert('Payment system initialization failed.');
-    paddle.Checkout.open({
-      items: [{ priceId: import.meta.env.VITE_PADDLE_SPROUT_PRICE_ID, quantity: 1 }]
-    });
+    try {
+      await paddle.Checkout.open({
+        items: [{ priceId: import.meta.env.VITE_PADDLE_SPROUT_PRICE_ID, quantity: 1 }]
+      });
+    } catch (err) {
+      console.error('[Checkout] Sprout error:', err);
+      alert('Checkout failed. Please check the console for details and ensure your domain is allowlisted in Paddle settings.');
+    }
   };
 
   const handleForest = async () => {
     const paddle = await getPaddle();
     if (!paddle) return alert('Payment system initialization failed.');
-    paddle.Checkout.open({
-      items: [{ priceId: import.meta.env.VITE_PADDLE_FOREST_PRICE_ID, quantity: 1 }]
-    });
+    try {
+      await paddle.Checkout.open({
+        items: [{ priceId: import.meta.env.VITE_PADDLE_FOREST_PRICE_ID, quantity: 1 }]
+      });
+    } catch (err) {
+      console.error('[Checkout] Forest error:', err);
+      alert('Checkout failed. Please check the console for details and ensure your domain is allowlisted in Paddle settings.');
+    }
   };
 
   return (
@@ -56,10 +66,16 @@ export function LandingPage() {
         display: 'flex', 
         justifyContent: 'space-between', 
         alignItems: 'center', 
-        padding: '1.5rem 3rem',
-        borderBottom: '1px solid var(--border-color)' 
+        padding: '1.25rem var(--page-padding)',
+        borderBottom: '1px solid var(--border-color)',
+        backgroundColor: 'rgba(0,0,0,0.8)',
+        backdropFilter: 'blur(20px)',
+        position: 'sticky',
+        top: 0,
+        zIndex: 100,
+        gap: '1rem'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }} onClick={() => setShowPricing(false)}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', cursor: 'pointer', flexShrink: 0 }} onClick={() => setShowPricing(false)}>
           <svg
             width="20"
             height="20"
@@ -97,94 +113,118 @@ export function LandingPage() {
           </svg>
           <div 
             style={{ 
-              fontSize: '1.25rem', 
+              fontSize: 'clamp(1.1rem, 4vw, 1.25rem)', 
               fontWeight: 800,
               color: showPricing ? 'var(--text-secondary)' : 'var(--text-primary)',
-              transition: 'var(--transition)'
+              transition: 'var(--transition)',
+              whiteSpace: 'nowrap'
             }}
           >
             SeedX
           </div>
         </div>
 
-        {/* Centered Pricing Button */}
-        <div style={{ 
-          position: 'absolute', 
-          left: '50%', 
-          transform: 'translateX(-50%)',
-          display: 'flex',
-          gap: '2rem'
-        }}>
+        {/* Navigation Links */}
+        <div 
+          className="hide-on-mobile"
+          style={{ 
+            display: 'flex',
+            alignItems: 'center',
+            gap: '1.5rem',
+            justifyContent: 'center',
+            flex: 1
+          }}
+        >
           <button
             onClick={() => setShowPricing(!showPricing)}
             style={{
-              padding: '0.5rem 1rem',
+              padding: '0.5rem',
               fontSize: '0.875rem',
               fontWeight: 600,
               color: showPricing ? 'var(--accent-primary)' : 'var(--text-secondary)',
               backgroundColor: 'transparent',
-              transition: 'var(--transition)'
-            }}
-            onMouseOver={(e) => e.currentTarget.style.color = 'var(--text-primary)'}
-            onMouseOut={(e) => {
-              if (!showPricing) e.currentTarget.style.color = 'var(--text-secondary)';
-              else e.currentTarget.style.color = 'var(--accent-primary)';
+              transition: 'var(--transition)',
+              border: 'none',
+              cursor: 'pointer',
+              whiteSpace: 'nowrap'
             }}
           >
             Pricing
           </button>
-        </div>
-        <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
-          <Link to="/app" style={{ textDecoration: 'none', color: 'var(--text-secondary)', fontWeight: 500, transition: 'var(--transition)' }} 
-            onMouseOver={(e) => e.currentTarget.style.color = 'var(--text-primary)'}
-            onMouseOut={(e) => e.currentTarget.style.color = 'var(--text-secondary)'}
-          >
+          
+          <Link to="/app" style={{ 
+            textDecoration: 'none', 
+            color: 'var(--text-secondary)', 
+            fontWeight: 500, 
+            fontSize: '0.875rem',
+            transition: 'var(--transition)',
+            display: 'flex',
+            alignItems: 'center',
+            whiteSpace: 'nowrap'
+          }}>
             {t.demo}
           </Link>
+        </div>
+
+        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexShrink: 0 }}>
           <button 
-            onClick={() => setIsModalOpen(true)}
             className="btn-primary" 
-            style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }}
+            style={{ 
+              padding: '0.5rem clamp(0.75rem, 2vw, 1.25rem)', 
+              fontSize: '0.8125rem',
+              minHeight: '36px'
+            }}
+            onClick={() => setIsModalOpen(true)}
           >
-            {t.joinWaitlist}
+            {t.cta}
           </button>
         </div>
       </nav>
 
-      {/* Content Switch */}
       {!showPricing ? (
-        <main style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '0 2rem' }}>
-          <h1 style={{ fontSize: '5rem', fontWeight: 800, letterSpacing: '-0.05em', lineHeight: 1.1, marginBottom: '1.5rem', maxWidth: '800px' }}>
+        <main style={{ 
+          flex: 1, 
+          display: 'flex', 
+          flexDirection: 'column', 
+          alignItems: 'center', 
+          justifyContent: 'center', 
+          textAlign: 'center', 
+          padding: '4rem var(--page-padding)',
+          maxWidth: '1200px',
+          margin: '0 auto',
+          width: '100%'
+        }}>
+          <h1 style={{ marginBottom: '1.5rem', maxWidth: '900px' }} className="gradient-text">
             {t.heroTitle}
           </h1>
-          <p style={{ fontSize: '1.25rem', color: 'var(--text-secondary)', maxWidth: '600px', lineHeight: 1.6, marginBottom: '3rem' }}>
+          <p style={{ fontSize: 'clamp(1rem, 2vw, 1.25rem)', color: 'var(--text-secondary)', maxWidth: '650px', lineHeight: 1.6, marginBottom: '3.5rem' }}>
             {t.heroSubtitle}
           </p>
 
-          <div style={{ display: 'flex', gap: '1rem' }}>
+          <div style={{ display: 'flex', gap: '1.25rem', flexWrap: 'wrap', justifyContent: 'center' }}>
             <button 
               className="btn-primary" 
-              style={{ padding: '1rem 2rem', fontSize: '1.125rem' }}
+              style={{ padding: '0.875rem 2.5rem', fontSize: '1rem' }}
               onClick={() => setIsModalOpen(true)}
             >
               {t.cta}
             </button>
-            <Link to="/app" className="btn-outline" style={{ textDecoration: 'none', padding: '1rem 2rem', fontSize: '1.125rem' }}>
+            <Link to="/app" className="btn-outline" style={{ textDecoration: 'none', padding: '0.875rem 2.5rem', fontSize: '1rem' }}>
               {t.seeHow}
             </Link>
           </div>
         </main>
       ) : (
-        <main style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '4rem 2rem' }}>
+        <main style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '4rem var(--page-padding)' }}>
           <div style={{ marginBottom: '4rem', textAlign: 'center' }}>
-            <h2 style={{ fontSize: '3rem', fontWeight: 800, marginBottom: '1rem' }}>{t.pricingTitle}</h2>
+            <h2 style={{ marginBottom: '1rem' }}>{t.pricingTitle}</h2>
             <p style={{ color: 'var(--text-secondary)', fontSize: '1.125rem' }}>{t.pricingSubtitle}</p>
           </div>
 
           <div style={{ 
             display: 'grid', 
-            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', 
-            gap: '2rem', 
+            gridTemplateColumns: 'repeat(auto-fit, minmax(clamp(280px, 80vw, 340px), 1fr))', 
+            gap: 'var(--content-gap)', 
             maxWidth: '1100px', 
             width: '100%' 
           }}>

@@ -67,15 +67,18 @@ function App() {
       }}>
         {/* Global App Header with Language Switcher and Dev Mode Indicator */}
         <header style={{
-          height: '60px',
+          height: '56px',
           borderBottom: '1px solid var(--border-color)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '0 2rem',
-          backgroundColor: 'var(--bg-base)',
-          position: 'relative',
-          zIndex: 10
+          padding: '0 var(--page-padding)',
+          backgroundColor: 'rgba(0,0,0,0.85)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          position: 'sticky',
+          top: 0,
+          zIndex: 100
         }}>
           {/* Left side - Language switcher */}
           <div style={{
@@ -143,11 +146,12 @@ function App() {
 
         <div style={{ 
           flex: 1, 
-          padding: isMobile ? '1rem' : '2rem', 
+          padding: 'var(--page-padding)', 
           overflowY: 'auto',
-          paddingBottom: isMobile ? 'calc(var(--nav-height) + 1rem)' : '2rem'
+          paddingBottom: isMobile ? 'calc(var(--nav-height) + var(--safe-area-bottom) + 2rem)' : 'var(--page-padding)',
+          WebkitOverflowScrolling: 'touch'
         }}>
-          <div style={{ maxWidth: '1000px', margin: '0 auto', height: '100%' }}>
+          <div style={{ maxWidth: '1000px', margin: '0 auto', height: '100%', display: 'flex', flexDirection: 'column' }} className="view-enter">
             {currentView === 'inbox' && <IdeaInbox language={language} isMobile={isMobile} />}
             {currentView === 'drafts' && <DraftGenerator language={language} isMobile={isMobile} />}
             {currentView === 'style' && <StyleView language={language} isMobile={isMobile} />}

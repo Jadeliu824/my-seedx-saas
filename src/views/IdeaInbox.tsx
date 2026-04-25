@@ -131,30 +131,33 @@ export function IdeaInbox({ language = 'EN', isMobile }: { language?: Language, 
           placeholder={t.inbox.placeholder}
           style={{
             width: '100%',
-            minHeight: '120px',
-            padding: '1rem',
-            paddingRight: '6rem', // Extra space for both buttons
+            minHeight: isMobile ? '140px' : '160px',
+            padding: '1.25rem',
+            paddingBottom: '3.5rem',
             fontSize: '1rem',
-            resize: 'vertical'
+            lineHeight: '1.5',
+            resize: 'none'
           }}
           className="glass-panel"
         />
         <div style={{
           position: 'absolute',
-          bottom: '1rem',
-          right: '1rem',
+          bottom: '0.75rem',
+          right: '0.75rem',
           display: 'flex',
-          gap: '0.5rem'
+          gap: '0.75rem',
+          alignItems: 'center'
         }}>
           <button
             type="button"
             onClick={toggleRecording}
             title={t.inbox.voiceInput}
             style={{
-              backgroundColor: isRecording ? '#ef4444' : 'var(--bg-surface-hover)',
-              color: isRecording ? 'white' : 'var(--text-primary)',
-              border: isRecording ? 'none' : '1px solid var(--border-color)',
-              padding: '0.5rem',
+              backgroundColor: isRecording ? '#ef4444' : 'rgba(255,255,255,0.05)',
+              color: isRecording ? 'white' : 'var(--text-secondary)',
+              border: '1px solid var(--border-color)',
+              width: '40px',
+              height: '40px',
               borderRadius: '50%',
               display: 'flex',
               alignItems: 'center',
@@ -162,158 +165,113 @@ export function IdeaInbox({ language = 'EN', isMobile }: { language?: Language, 
               transition: 'var(--transition)',
             }}
           >
-            {isRecording ? <MicOff size={18} /> : <Mic size={18} />}
+            {isRecording ? <MicOff size={20} /> : <Mic size={20} />}
           </button>
           
           <button
             type="submit"
             disabled={!inputText.trim()}
             style={{
-              backgroundColor: inputText.trim() ? 'var(--accent-primary)' : 'var(--border-color)',
+              backgroundColor: inputText.trim() ? 'var(--accent-primary)' : 'rgba(255,255,255,0.03)',
               color: '#000000',
-              padding: '0.5rem',
+              width: '40px',
+              height: '40px',
               borderRadius: '50%',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               transition: 'var(--transition)',
-              opacity: inputText.trim() ? 1 : 0.5,
-              cursor: inputText.trim() ? 'pointer' : 'not-allowed'
+              opacity: inputText.trim() ? 1 : 0.3,
+              cursor: inputText.trim() ? 'pointer' : 'not-allowed',
+              border: 'none'
             }}
           >
-            <Send size={18} />
+            <Send size={20} />
           </button>
         </div>
       </form>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        <h3 style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>{t.inbox.pendingIdeas} ({inboxIdeas.length})</h3>
+        <h3 style={{ fontSize: '1.25rem', marginBottom: '0.5rem', fontWeight: 600 }}>{t.inbox.pendingIdeas} ({inboxIdeas.length})</h3>
         
         {inboxIdeas.length === 0 ? (
-          <div className="glass-panel" style={{ padding: '3rem', textAlign: 'center' }}>
+          <div className="section-card" style={{ padding: '3rem', textAlign: 'center', backgroundColor: 'var(--bg-surface)' }}>
             <p className="text-muted">{t.inbox.emptyState}</p>
           </div>
         ) : (
           inboxIdeas.map(idea => (
-            <div key={idea.id} className="glass-panel" style={{ 
-              padding: '1.5rem', 
+            <div key={idea.id} className="section-card" style={{ 
               display: 'flex', 
-              flexDirection: isMobile ? 'column' : 'row',
-              justifyContent: 'space-between', 
-              alignItems: isMobile ? 'stretch' : 'flex-start',
-              gap: '1rem'
+              flexDirection: 'column',
+              backgroundColor: 'var(--bg-base)'
             }}>
-              <div>
-                <p style={{ whiteSpace: 'pre-wrap', marginBottom: '1rem', fontWeight: 500 }}>{idea.content}</p>
-                <span className="text-muted" style={{ fontSize: '0.75rem' }}>
-                  {new Date(idea.createdAt).toLocaleString(language === 'EN' ? 'en-US' : 'zh-CN')}
+              <div className="section-card-header">
+                <span className="text-muted" style={{ fontSize: '0.75rem', fontWeight: 500 }}>
+                  {new Date(idea.createdAt).toLocaleDateString(language === 'EN' ? 'en-US' : 'zh-CN', {
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
                 </span>
-              </div>
-              <div style={{ display: 'flex', gap: '0.75rem', alignSelf: isMobile ? 'flex-end' : 'flex-start' }}>
-                {deletingIdeaId === idea.id ? (
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        deleteIdea(idea.id);
-                        setDeletingIdeaId(null);
-                      }}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.25rem',
-                        padding: '0.5rem 0.75rem',
-                        borderRadius: 'var(--radius-md)',
-                        backgroundColor: 'rgba(34, 197, 94, 0.1)',
-                        color: '#22c55e',
-                        border: 'none',
-                        cursor: 'pointer',
-                        fontSize: '0.75rem',
-                        fontWeight: 600
-                      }}
-                    >
-                      <Check size={14} /> {t.common.confirm}
-                    </button>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setDeletingIdeaId(null);
-                      }}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.25rem',
-                        padding: '0.5rem 0.75rem',
-                        borderRadius: 'var(--radius-md)',
-                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                        color: '#ef4444',
-                        border: 'none',
-                        cursor: 'pointer',
-                        fontSize: '0.75rem',
-                        fontWeight: 600
-                      }}
-                    >
-                      <X size={14} /> {t.common.cancel}
-                    </button>
-                  </div>
-                ) : (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setDeletingIdeaId(idea.id);
-                    }}
-                    style={{
-                      padding: '0.5rem',
-                      borderRadius: 'var(--radius-md)',
-                      color: 'var(--text-muted)',
-                      transition: 'var(--transition)',
-                      border: '1px solid var(--border-color)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.color = '#ef4444';
-                      e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
-                      e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.2)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.color = 'var(--text-muted)';
-                      e.currentTarget.style.backgroundColor = 'transparent';
-                      e.currentTarget.style.borderColor = 'var(--border-color)';
-                    }}
-                  >
-                    <Trash2 size={18} />
-                  </button>
-                )}
+                <div className="section-card-actions">
+                  {deletingIdeaId === idea.id ? (
+                    <div style={{ display: 'flex', gap: '0.375rem' }}>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          deleteIdea(idea.id);
+                          setDeletingIdeaId(null);
+                        }}
+                        className="action-btn"
+                        style={{
+                          backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                          color: '#22c55e',
+                        }}
+                      >
+                        <Check size={14} /> {t.common.confirm}
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDeletingIdeaId(null);
+                        }}
+                        className="action-btn"
+                        style={{
+                          backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                          color: '#ef4444',
+                        }}
+                      >
+                        <X size={14} /> {t.common.cancel}
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDeletingIdeaId(idea.id);
+                        }}
+                        className="action-btn action-btn-ghost"
+                        title={t.common.delete}
+                      >
+                        <Trash2 size={16} />
+                      </button>
 
-                <button
-                  onClick={() => handleDeepen(idea.id, idea.content)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    backgroundColor: 'transparent',
-                    border: '1px solid var(--accent-primary)',
-                    color: 'var(--accent-primary)',
-                    padding: '0.5rem 1rem',
-                    borderRadius: 'var(--radius-sm)',
-                    fontSize: '0.875rem',
-                    fontWeight: 600,
-                    transition: 'var(--transition)'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = 'var(--accent-primary)';
-                    e.currentTarget.style.color = '#000000';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = 'transparent';
-                    e.currentTarget.style.color = 'var(--accent-primary)';
-                  }}
-                >
-                  {t.inbox.expand}
-                  <ArrowRight size={16} />
-                </button>
+                      <button
+                        onClick={() => handleDeepen(idea.id, idea.content)}
+                        className="action-btn action-btn-accent"
+                        style={{ fontWeight: 600 }}
+                      >
+                        {t.inbox.expand}
+                        <ArrowRight size={14} />
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+              <div style={{ padding: '1.25rem' }}>
+                <p style={{ whiteSpace: 'pre-wrap', fontWeight: 400, fontSize: '1rem', lineHeight: 1.6 }}>{idea.content}</p>
               </div>
             </div>
           ))

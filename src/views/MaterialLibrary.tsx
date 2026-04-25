@@ -47,10 +47,17 @@ export function MaterialLibrary({ language = 'EN', isMobile }: { language?: 'CN'
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', position: 'relative' }}>
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: isMobile ? 'flex-start' : 'center', marginBottom: '2rem', flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? '1rem' : '0' }}>
+      <header style={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: isMobile ? 'flex-start' : 'center', 
+        marginBottom: isMobile ? '1.5rem' : '2.5rem', 
+        flexDirection: isMobile ? 'column' : 'row', 
+        gap: isMobile ? '1rem' : '0' 
+      }}>
         <div>
-          <h2 style={{ fontSize: '1.875rem', fontWeight: 700 }}>{t.materials.title}</h2>
-          <p className="text-muted" style={{ marginTop: '0.5rem' }}>{t.materials.subtitle}</p>
+          <h2 style={{ fontSize: isMobile ? '1.5rem' : '1.875rem', fontWeight: 700 }}>{t.materials.title}</h2>
+          <p className="text-muted" style={{ marginTop: '0.25rem', fontSize: isMobile ? '0.875rem' : '1rem' }}>{t.materials.subtitle}</p>
         </div>
         <button
           onClick={() => {
@@ -58,9 +65,10 @@ export function MaterialLibrary({ language = 'EN', isMobile }: { language?: 'CN'
           }}
           className="btn-primary"
           style={{
-            padding: '0.75rem 1.25rem',
+            padding: '0.6rem 1.25rem',
             fontSize: '0.875rem',
-            width: isMobile ? '100%' : 'auto'
+            width: isMobile ? '100%' : 'auto',
+            justifyContent: 'center'
           }}
         >
           <Plus size={18} />
@@ -84,15 +92,23 @@ export function MaterialLibrary({ language = 'EN', isMobile }: { language?: 'CN'
           zIndex: 9999,
           padding: '1rem'
         }}>
-          <div className="glass-panel" style={{ width: '100%', maxWidth: '500px', padding: '2rem', position: 'relative' }}>
+          <div className="section-card" style={{ 
+            width: '100%', 
+            maxWidth: '500px', 
+            padding: isMobile ? '1.5rem' : '2rem', 
+            position: 'relative',
+            backgroundColor: 'var(--bg-surface)',
+            border: '1px solid var(--border-color)',
+            boxShadow: '0 20px 50px rgba(0,0,0,0.5)'
+          }}>
             <h3 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '1.5rem' }}>{t.materials.addNew}</h3>
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
               <div>
                 <label style={{ display: 'block', fontSize: '0.875rem', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>{t.materials.type}</label>
                 <select 
                   value={formData.type}
                   onChange={(e) => setFormData({...formData, type: e.target.value as MaterialType})}
-                  style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
+                  style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', backgroundColor: 'rgba(0,0,0,0.2)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', fontSize: '0.95rem' }}
                 >
                   {tabs.filter(t => t.id !== 'all').map(t => (
                     <option key={t.id} value={t.id}>{t.label}</option>
@@ -106,17 +122,17 @@ export function MaterialLibrary({ language = 'EN', isMobile }: { language?: 'CN'
                   placeholder={t.materials.titleField + '...'}
                   value={formData.title}
                   onChange={(e) => setFormData({...formData, title: e.target.value})}
-                  style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
+                  style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', backgroundColor: 'rgba(0,0,0,0.2)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', fontSize: '0.95rem' }}
                 />
               </div>
               <div>
                 <label style={{ display: 'block', fontSize: '0.875rem', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>{t.materials.content}</label>
                 <textarea
-                  rows={5}
+                  rows={isMobile ? 4 : 6}
                   placeholder={t.materials.content + '...'}
                   value={formData.content}
                   onChange={(e) => setFormData({...formData, content: e.target.value})}
-                  style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', resize: 'vertical' }}
+                  style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', backgroundColor: 'rgba(0,0,0,0.2)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', resize: 'vertical', fontSize: '0.95rem' }}
                 />
               </div>
               <div>
@@ -126,14 +142,14 @@ export function MaterialLibrary({ language = 'EN', isMobile }: { language?: 'CN'
                   placeholder={t.materials.tagsPlaceholder}
                   value={formData.tags}
                   onChange={(e) => setFormData({...formData, tags: e.target.value})}
-                  style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
+                  style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', backgroundColor: 'rgba(0,0,0,0.2)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', fontSize: '0.95rem' }}
                 />
               </div>
-              <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-                <button type="button" onClick={() => setIsModalOpen(false)} style={{ flex: 1, padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', color: 'var(--text-secondary)' }}>
+              <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem' }}>
+                <button type="button" onClick={() => setIsModalOpen(false)} style={{ flex: 1, padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', color: 'var(--text-secondary)', fontSize: '0.95rem' }}>
                   {t.common.cancel}
                 </button>
-                <button type="submit" className="btn-primary" style={{ flex: 1 }}>
+                <button type="submit" className="btn-primary" style={{ flex: 1, fontSize: '0.95rem', justifyContent: 'center' }}>
                   {t.materials.saveMaterial}
                 </button>
               </div>
@@ -143,7 +159,17 @@ export function MaterialLibrary({ language = 'EN', isMobile }: { language?: 'CN'
       )}
 
       {/* Navigation Tabs */}
-      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '2rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem', overflowX: 'auto' }}>
+      <div style={{ 
+        display: 'flex', 
+        gap: '0.5rem', 
+        marginBottom: '2rem', 
+        borderBottom: '1px solid var(--border-color)', 
+        paddingBottom: '0.75rem', 
+        overflowX: 'auto',
+        scrollbarWidth: 'none',
+        msOverflowStyle: 'none',
+        WebkitOverflowScrolling: 'touch'
+      }} className="hide-scrollbar">
         {tabs.map(tab => {
           const isActive = activeTab === tab.id;
           const Icon = tab.icon;
@@ -156,16 +182,17 @@ export function MaterialLibrary({ language = 'EN', isMobile }: { language?: 'CN'
                  alignItems: 'center',
                  gap: '0.5rem',
                  padding: '0.5rem 1rem',
-                 borderRadius: 'var(--radius-lg)',
-                 backgroundColor: isActive ? 'var(--bg-surface-hover)' : 'transparent',
-                 border: isActive ? '1px solid var(--accent-primary)' : '1px solid transparent',
-                 color: isActive ? 'var(--accent-primary)' : 'var(--text-secondary)',
+                 borderRadius: 'var(--radius-full)',
+                 backgroundColor: isActive ? 'var(--accent-primary)' : 'transparent',
+                 border: isActive ? '1px solid var(--accent-primary)' : '1px solid var(--border-color)',
+                 color: isActive ? '#000' : 'var(--text-secondary)',
                  fontWeight: isActive ? 600 : 400,
                  transition: 'var(--transition)',
-                 whiteSpace: 'nowrap'
+                 whiteSpace: 'nowrap',
+                 fontSize: '0.875rem'
                }}
             >
-              {Icon && <Icon size={16} />}
+              {Icon && <Icon size={14} />}
               {tab.label}
             </button>
           );
@@ -175,24 +202,33 @@ export function MaterialLibrary({ language = 'EN', isMobile }: { language?: 'CN'
       {/* Grid of Materials */}
       <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem', overflowY: 'auto', paddingBottom: '2rem' }}>
         {filteredMaterials.map(mat => (
-          <div key={mat.id} className="glass-panel" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <div key={mat.id} className="section-card" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span className="text-muted" style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              <span style={{ 
+                fontSize: '0.7rem', 
+                textTransform: 'uppercase', 
+                letterSpacing: '0.05em',
+                color: 'var(--accent-primary)',
+                fontWeight: 600,
+                backgroundColor: 'rgba(255, 183, 235, 0.1)',
+                padding: '0.2rem 0.5rem',
+                borderRadius: '4px'
+              }}>
                 {tabs.find(t => t.id === mat.type)?.label}
               </span>
               {mat.tags && mat.tags.length > 0 && (
-                <div style={{ display: 'flex', gap: '0.25rem' }}>
+                <div style={{ display: 'flex', gap: '0.25rem', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
                   {mat.tags.map(tag => (
-                    <span key={tag} style={{ fontSize: '0.7rem', padding: '0.1rem 0.4rem', backgroundColor: 'var(--bg-surface-hover)', border: '1px solid var(--border-color)', borderRadius: '4px' }}>
-                      {tag}
+                    <span key={tag} style={{ fontSize: '0.65rem', padding: '0.1rem 0.4rem', backgroundColor: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-color)', borderRadius: '4px', color: 'var(--text-secondary)' }}>
+                      #{tag}
                     </span>
                   ))}
                 </div>
               )}
             </div>
             
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-              <h3 style={{ fontSize: '1.125rem', fontWeight: 600 }}>{mat.title}</h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem' }}>
+              <h3 style={{ fontSize: '1.05rem', fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.4 }}>{mat.title}</h3>
               {deletingMatId === mat.id ? (
                 <div style={{ display: 'flex', gap: '0.25rem' }}>
                   <button
@@ -206,8 +242,7 @@ export function MaterialLibrary({ language = 'EN', isMobile }: { language?: 'CN'
                       borderRadius: 'var(--radius-sm)',
                       backgroundColor: 'rgba(34, 197, 94, 0.1)',
                       color: '#22c55e',
-                      border: 'none',
-                      cursor: 'pointer'
+                      border: 'none'
                     }}
                     title={t.common.confirm}
                   >
@@ -223,8 +258,7 @@ export function MaterialLibrary({ language = 'EN', isMobile }: { language?: 'CN'
                       borderRadius: 'var(--radius-sm)',
                       backgroundColor: 'rgba(239, 68, 68, 0.1)',
                       color: '#ef4444',
-                      border: 'none',
-                      cursor: 'pointer'
+                      border: 'none'
                     }}
                     title={t.common.cancel}
                   >
@@ -241,31 +275,22 @@ export function MaterialLibrary({ language = 'EN', isMobile }: { language?: 'CN'
                     padding: '0.4rem',
                     borderRadius: 'var(--radius-sm)',
                     transition: 'var(--transition)',
-                    cursor: 'pointer',
-                    backgroundColor: 'transparent',
-                    border: '1px solid transparent',
+                    backgroundColor: 'rgba(255,255,255,0.03)',
+                    border: '1px solid var(--border-color)',
                     color: 'var(--text-secondary)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     flexShrink: 0
                   }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.color = '#ef4444';
-                    e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.color = 'var(--text-secondary)';
-                    e.currentTarget.style.backgroundColor = 'transparent';
-                  }}
                   title={t.materials.deleteMaterial}
                 >
-                  <Trash2 size={16} />
+                  <Trash2 size={15} />
                 </button>
               )}
             </div>
             
-            <p className="text-muted" style={{ fontSize: '0.875rem', lineHeight: 1.6, flex: 1 }}>
+            <p className="text-muted" style={{ fontSize: '0.875rem', lineHeight: 1.6, flex: 1, display: '-webkit-box', WebkitLineClamp: 4, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
               {mat.content}
             </p>
           </div>
