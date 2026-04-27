@@ -20,7 +20,7 @@ SeedX offers a free tier with limited usage and a Pro subscription. Payments are
 You may cancel your subscription at any time. Cancellation takes effect at the end of the current billing period. You will retain access to Pro features until then.
 
 6. Refund Policy
-We offer a 7-day money-back guarantee. If you are not satisfied within 7 days of your initial purchase, contact us for a full refund. No refunds are issued after 7 days.
+We offer a satisfaction guarantee. If you are not satisfied with your purchase, please contact us for support or refund inquiries.
 
 7. Acceptable Use
 You agree not to use SeedX to:
@@ -65,7 +65,7 @@ SeedX 提供免费版（有限次数）及 Pro 订阅版本。付款通过 Paddl
 您可随时取消订阅。取消将在当前计费周期结束后生效，您在此之前仍可使用 Pro 功能。
 
 6. 退款政策
-我们提供 7 天退款保障。若您在首次购买后 7 天内对服务不满意，可联系我们申请全额退款。7 天后不予退款。
+我们提供满意度保障。若您对服务不满意，可联系我们进行咨询或申请退款。
 
 7. 使用规范
 您同意不使用 SeedX 进行以下行为：
@@ -207,8 +207,8 @@ SeedX 不面向 13 岁以下用户。我们不会有意收集儿童数据。
       title: "Refund Policy",
       content: `Last updated: April 2026
 
-1. 7-Day Money-Back Guarantee
-We offer a full refund within 7 days of your initial purchase if you are not satisfied with SeedX Pro for any reason. No questions asked.
+1. Money-Back Guarantee
+We offer a full refund if you are not satisfied with SeedX Pro for any reason.
 
 2. How to Request a Refund
 To request a refund, email us at jadelu0824@hotmail.com with:
@@ -234,8 +234,8 @@ For refund requests: jadelu0824@hotmail.com`
       title: "退款政策",
       content: `最后更新：2026年4月
 
-1. 7天无理由退款保障
-若您在首次购买 SeedX Pro 后 7 天内因任何原因对服务不满意，可申请全额退款，无需说明理由。
+1. 无理由退款保障
+若您因任何原因对 SeedX Pro 服务不满意，可申请全额退款，无需说明理由。
 
 2. 如何申请退款
 请发送邮件至 jadelu0824@hotmail.com，注明：

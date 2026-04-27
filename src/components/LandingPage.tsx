@@ -357,7 +357,7 @@ export function LandingPage() {
           </div>
           
           <div style={{ marginTop: '4rem', color: 'var(--text-muted)', fontSize: '0.875rem', textAlign: 'center' }}>
-            Secure payment powered by Paddle. 100% money-back guarantee.
+            Secure payment powered by Paddle.
           </div>
         </main>
       )}
