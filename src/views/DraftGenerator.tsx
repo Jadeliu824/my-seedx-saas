@@ -70,12 +70,11 @@ export function DraftGenerator({ language = 'EN', isMobile }: { language?: Langu
   useEffect(() => {
     const handleSuccess = () => {
       setShowUpgradeModal(false);
-      // For a real app, we'd fetch the user's plan from Supabase here.
-      // For now, we'll just set dev mode to true in localStorage to simulate "Unlimited" access
-      // or at least reset the usage count.
       localStorage.setItem('seedx_dev_mode', 'true');
+      localStorage.setItem('seedx_plan', 'sprout');
+      window.dispatchEvent(new Event('seedx_dev_mode_changed'));
       setUsageCount(0);
-      alert(language === 'CN' ? '升级成功！你现在拥有无限使用权限。' : 'Upgrade Successful! You now have unlimited access.');
+      alert(language === 'CN' ? '升级成功！您已订阅 Sprout 方案，现已解锁无限创作。' : 'Upgrade Successful! You are now subscribed to the Sprout plan and have unlimited access.');
     };
 
     window.addEventListener('paddle_checkout_completed', handleSuccess);

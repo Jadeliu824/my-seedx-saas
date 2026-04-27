@@ -22,6 +22,9 @@ export function LandingPage() {
     const handleSuccess = () => {
       setCheckoutSuccess(true);
       setShowPricing(false);
+      localStorage.setItem('seedx_dev_mode', 'true');
+      localStorage.setItem('seedx_plan', 'sprout');
+      window.dispatchEvent(new Event('seedx_dev_mode_changed'));
       // Auto-hide success message after 10 seconds
       setTimeout(() => setCheckoutSuccess(false), 10000);
     };

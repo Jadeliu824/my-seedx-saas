@@ -18,6 +18,9 @@ function App() {
   const [devMode, setDevMode] = useState(() => {
     return localStorage.getItem('seedx_dev_mode') === 'true';
   });
+  const [plan, setPlan] = useState(() => {
+    return localStorage.getItem('seedx_plan') || 'free';
+  });
 
 
   useEffect(() => {
@@ -38,6 +41,7 @@ function App() {
     // Listen for dev mode changes
     const handleDevModeChanged = () => {
       setDevMode(localStorage.getItem('seedx_dev_mode') === 'true');
+      setPlan(localStorage.getItem('seedx_plan') || 'free');
     };
     window.addEventListener('seedx_dev_mode_changed', handleDevModeChanged);
 
@@ -118,28 +122,30 @@ function App() {
             </button>
           </div>
 
-          {/* Right side - Dev mode indicator */}
-          {devMode && (
+          {/* Right side - Plan/Dev mode indicator */}
+          {(devMode || plan !== 'free') && (
             <div style={{
               display: 'flex',
               alignItems: 'center',
               gap: '0.5rem',
               fontSize: '0.75rem',
-              fontWeight: 600,
-              color: '#10b981',
-              backgroundColor: 'rgba(16, 185, 129, 0.1)',
+              fontWeight: 700,
+              color: plan !== 'free' ? 'var(--accent-primary)' : '#10b981',
+              backgroundColor: plan !== 'free' ? 'rgba(251, 191, 36, 0.1)' : 'rgba(16, 185, 129, 0.1)',
               padding: '0.25rem 0.75rem',
               borderRadius: 'var(--radius-md)',
-              border: '1px solid rgba(16, 185, 129, 0.3)',
+              border: `1px solid ${plan !== 'free' ? 'var(--accent-primary)' : 'rgba(16, 185, 129, 0.3)'}`,
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em'
             }}>
               <div style={{
                 width: '6px',
                 height: '6px',
                 borderRadius: '50%',
-                backgroundColor: '#10b981',
+                backgroundColor: plan !== 'free' ? 'var(--accent-primary)' : '#10b981',
                 animation: 'pulse 1.5s infinite'
               }} />
-              <span>DEV</span>
+              <span>{plan !== 'free' ? plan : 'DEV'}</span>
             </div>
           )}
         </header>
