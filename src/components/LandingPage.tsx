@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 import { translations, type Language } from '../i18n/translations';
 import { Footer } from './Footer';
 import { getPaddle } from '../lib/paddle';
+import { Check, Sparkles } from 'lucide-react';
 
 export function LandingPage() {
   // Landing page always defaults to English
@@ -15,6 +16,19 @@ export function LandingPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [showPricing, setShowPricing] = useState(false);
+  const [checkoutSuccess, setCheckoutSuccess] = useState(false);
+
+  useEffect(() => {
+    const handleSuccess = () => {
+      setCheckoutSuccess(true);
+      setShowPricing(false);
+      // Auto-hide success message after 10 seconds
+      setTimeout(() => setCheckoutSuccess(false), 10000);
+    };
+
+    window.addEventListener('paddle_checkout_completed', handleSuccess);
+    return () => window.removeEventListener('paddle_checkout_completed', handleSuccess);
+  }, []);
 
   const handleJoinWaitlist = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,6 +54,8 @@ export function LandingPage() {
       await paddle.Checkout.open({
         items: [{ priceId: import.meta.env.VITE_PADDLE_SPROUT_PRICE_ID, quantity: 1 }]
       });
+      // Listen for success in the global event listener in paddle.ts
+      // But we can also set a local flag if we want, though paddle.ts is better
     } catch (err) {
       console.error('[Checkout] Sprout error:', err);
       alert('Checkout failed. Please check the console for details and ensure your domain is allowlisted in Paddle settings.');
@@ -196,6 +212,26 @@ export function LandingPage() {
           margin: '0 auto',
           width: '100%'
         }}>
+          {checkoutSuccess && (
+            <div style={{
+              backgroundColor: 'rgba(52, 211, 153, 0.1)',
+              border: '1px solid var(--accent-primary)',
+              color: 'var(--accent-primary)',
+              padding: '1rem 2rem',
+              borderRadius: 'var(--radius-lg)',
+              marginBottom: '2rem',
+              animation: 'slideUp 0.5s ease',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.75rem'
+            }}>
+              <Check size={20} />
+              <div style={{ textAlign: 'left' }}>
+                <div style={{ fontWeight: 700 }}>Upgrade Successful!</div>
+                <div style={{ fontSize: '0.875rem' }}>Welcome to the Sprout family. Your limits have been lifted.</div>
+              </div>
+            </div>
+          )}
           <h1 style={{ marginBottom: '1.5rem', maxWidth: '900px' }} className="gradient-text">
             {t.heroTitle}
           </h1>
@@ -207,7 +243,10 @@ export function LandingPage() {
             <button 
               className="btn-primary" 
               style={{ padding: '0.875rem 2.5rem', fontSize: '1rem' }}
-              onClick={() => setIsModalOpen(true)}
+              onClick={() => {
+                setShowPricing(true);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
             >
               {t.cta}
             </button>
@@ -221,102 +260,101 @@ export function LandingPage() {
           </div>
         </main>
       ) : (
-        <main style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '4rem var(--page-padding)' }}>
-          <div style={{ marginBottom: '4rem', textAlign: 'center' }}>
-            <h2 style={{ marginBottom: '1rem' }}>{t.pricingTitle}</h2>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '1.125rem' }}>{t.pricingSubtitle}</p>
+        <main style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '4rem var(--page-padding)', maxWidth: '1200px', margin: '0 auto', width: '100%' }}>
+          <div style={{ marginBottom: '4rem', textAlign: 'center', animation: 'fadeIn 0.6s ease' }}>
+            <h2 style={{ marginBottom: '1rem', fontSize: 'clamp(2rem, 5vw, 3.5rem)' }} className="gradient-text">{t.pricingTitle}</h2>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '1.25rem', maxWidth: '600px', margin: '0 auto' }}>{t.pricingSubtitle}</p>
           </div>
 
           <div style={{ 
             display: 'grid', 
-            gridTemplateColumns: 'repeat(auto-fit, minmax(clamp(280px, 80vw, 340px), 1fr))', 
-            gap: 'var(--content-gap)', 
-            maxWidth: '1100px', 
-            width: '100%' 
+            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', 
+            gap: '2rem', 
+            width: '100%',
+            perspective: '1000px'
           }}>
             {/* Seed Plan */}
-            <div className="glass-panel" style={{ padding: '2.5rem', display: 'flex', flexDirection: 'column', transition: 'var(--transition)' }}>
+            <div className="pricing-card">
               <div style={{ marginBottom: '2rem' }}>
-                <h3 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.5rem' }}>{t.plans.seed.name}</h3>
-                <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>{t.plans.seed.desc}</p>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{t.plans.seed.name}</h3>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>{t.plans.seed.desc}</p>
               </div>
-              <div style={{ marginBottom: '2rem' }}>
-                <span style={{ fontSize: '2.5rem', fontWeight: 800 }}>{t.plans.seed.price}</span>
-                <span style={{ color: 'var(--text-secondary)' }}>/ forever</span>
+              <div className="price-tag">
+                {t.plans.seed.price}
+                <span className="price-period">/ forever</span>
               </div>
-              <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 2rem 0', display: 'flex', flexDirection: 'column', gap: '1rem', flex: 1 }}>
+              <ul className="feature-list">
                 {t.plans.seed.features.map((feature, i) => (
-                  <li key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem' }}>✓ {feature}</li>
+                  <li key={i} className="feature-item">
+                    <Check size={18} />
+                    {feature}
+                  </li>
                 ))}
               </ul>
-              <Link to="/app" className="btn-outline" style={{ textDecoration: 'none', display: 'flex', width: '100%', justifyContent: 'center' }}>
+              <Link to="/app" className="btn-outline" style={{ textDecoration: 'none', width: '100%', justifyContent: 'center', marginTop: 'auto' }}>
                 {t.plans.seed.btn}
               </Link>
             </div>
 
             {/* Sprout Plan */}
-            <div className="glass-panel" style={{ 
-              padding: '2.5rem', 
-              display: 'flex', 
-              flexDirection: 'column', 
-              border: '2px solid var(--accent-primary)',
-              position: 'relative',
-              backgroundColor: 'rgba(52, 211, 153, 0.05)',
-              transition: 'var(--transition)'
-            }}>
-              <div style={{ 
-                position: 'absolute', 
-                top: '-12px', 
-                left: '50%', 
-                transform: 'translateX(-50%)',
-                backgroundColor: 'var(--accent-primary)',
-                color: '#000',
-                padding: '2px 12px',
-                borderRadius: '12px',
-                fontSize: '0.75rem',
-                fontWeight: 700
-              }}>
-                MOST POPULAR
-              </div>
+            <div className="pricing-card pricing-card-featured">
+              <div className="badge-featured">MOST POPULAR</div>
               <div style={{ marginBottom: '2rem' }}>
-                <h3 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.5rem' }}>{t.plans.sprout.name}</h3>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--accent-primary)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{t.plans.sprout.name}</h3>
                 <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>{t.plans.sprout.desc}</p>
               </div>
-              <div style={{ marginBottom: '2rem' }}>
-                <span style={{ fontSize: '2.5rem', fontWeight: 800 }}>{t.plans.sprout.price}</span>
-                <span style={{ color: 'var(--text-secondary)' }}>/ month</span>
+              <div className="price-tag">
+                {t.plans.sprout.price}
+                <span className="price-period">/ month</span>
               </div>
-              <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 2rem 0', display: 'flex', flexDirection: 'column', gap: '1rem', flex: 1 }}>
+              <ul className="feature-list">
                 {t.plans.sprout.features.map((feature, i) => (
-                  <li key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem' }}>✓ {feature}</li>
+                  <li key={i} className="feature-item" style={{ color: 'var(--text-primary)' }}>
+                    <Check size={18} />
+                    {feature}
+                  </li>
                 ))}
               </ul>
               <button 
                 onClick={handleSprout}
                 className="btn-primary" 
-                style={{ width: '100%', justifyContent: 'center' }}
+                style={{ width: '100%', justifyContent: 'center', marginTop: 'auto', fontSize: '1rem', padding: '1rem' }}
               >
+                <Sparkles size={18} />
                 {t.plans.sprout.btn}
               </button>
             </div>
 
             {/* Forest Plan */}
-            <div className="glass-panel" style={{ padding: '2.5rem', display: 'flex', flexDirection: 'column', transition: 'var(--transition)' }}>
+            <div className="pricing-card">
               <div style={{ marginBottom: '2rem' }}>
-                <h3 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.5rem' }}>{t.plans.forest.name}</h3>
-                <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>{t.plans.forest.desc}</p>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{t.plans.forest.name}</h3>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>{t.plans.forest.desc}</p>
               </div>
-              <div style={{ marginBottom: '2rem' }}>
-                <span style={{ fontSize: '2.5rem', fontWeight: 800 }}>{t.plans.forest.price}</span>
-                <span style={{ color: 'var(--text-secondary)' }}>/ month</span>
+              <div className="price-tag">
+                {t.plans.forest.price}
+                <span className="price-period">/ month</span>
               </div>
-              <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 2rem 0', display: 'flex', flexDirection: 'column', gap: '1rem', flex: 1 }}>
+              <ul className="feature-list">
                 {t.plans.forest.features.map((feature, i) => (
-                  <li key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem' }}>✓ {feature}</li>
+                  <li key={i} className="feature-item">
+                    <Check size={18} />
+                    {feature}
+                  </li>
                 ))}
               </ul>
-              <button onClick={handleForest} className="btn-outline" style={{ width: '100%', justifyContent: 'center' }}>{t.plans.forest.btn}</button>
+              <button 
+                onClick={handleForest} 
+                className="btn-outline" 
+                style={{ width: '100%', justifyContent: 'center', marginTop: 'auto' }}
+              >
+                {t.plans.forest.btn}
+              </button>
             </div>
+          </div>
+          
+          <div style={{ marginTop: '4rem', color: 'var(--text-muted)', fontSize: '0.875rem', textAlign: 'center' }}>
+            Secure payment powered by Paddle. 100% money-back guarantee.
           </div>
         </main>
       )}

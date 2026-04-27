@@ -30,9 +30,11 @@ export const getPaddle = async () => {
       console.log('[Paddle Event]', event.name, event);
       if (event.name === 'checkout.completed') {
         console.log('[Paddle] ✅ Checkout completed:', event.data);
+        window.dispatchEvent(new CustomEvent('paddle_checkout_completed', { detail: event.data }));
       }
       if (event.name === 'checkout.error') {
         console.error('[Paddle] ❌ Checkout error details:', JSON.stringify(event, null, 2));
+        window.dispatchEvent(new CustomEvent('paddle_checkout_error', { detail: event }));
       }
     },
   });

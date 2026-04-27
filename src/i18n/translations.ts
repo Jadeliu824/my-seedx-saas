@@ -132,7 +132,7 @@ export const translations = {
       heroSubtitle: '不只是内容生成器——SeedX 学习你的声音，输出听起来像你写的内容',
       pricingTitle: '选择最适合你的方案',
       pricingSubtitle: '让你的每一颗灵感种子都有发芽的机会',
-      cta: '加入Waitlist →',
+      cta: '开始使用 →',
       seeHow: '看看怎么用',
       plans: {
         seed: {
@@ -302,7 +302,7 @@ export const translations = {
       heroSubtitle: 'More than just a generator — SeedX learns your voice to produce content that sounds exactly like you.',
       pricingTitle: 'Choose the best plan for you',
       pricingSubtitle: 'Give every seed of inspiration a chance to sprout',
-      cta: 'Join Waitlist →',
+      cta: 'Get Started →',
       seeHow: 'See How it Works',
       plans: {
         seed: {

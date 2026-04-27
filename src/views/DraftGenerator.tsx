@@ -67,6 +67,21 @@ export function DraftGenerator({ language = 'EN', isMobile }: { language?: Langu
     localStorage.setItem('seedx_style_refinements', JSON.stringify(styleRefinements));
   }, [styleRefinements]);
 
+  useEffect(() => {
+    const handleSuccess = () => {
+      setShowUpgradeModal(false);
+      // For a real app, we'd fetch the user's plan from Supabase here.
+      // For now, we'll just set dev mode to true in localStorage to simulate "Unlimited" access
+      // or at least reset the usage count.
+      localStorage.setItem('seedx_dev_mode', 'true');
+      setUsageCount(0);
+      alert(language === 'CN' ? '升级成功！你现在拥有无限使用权限。' : 'Upgrade Successful! You now have unlimited access.');
+    };
+
+    window.addEventListener('paddle_checkout_completed', handleSuccess);
+    return () => window.removeEventListener('paddle_checkout_completed', handleSuccess);
+  }, [language]);
+
   const currentDraft = drafts.find(d => d.id === selectedDraftId);
   const currentIdea = currentDraft ? ideas.find(i => i.id === currentDraft.ideaId) : null;
 
