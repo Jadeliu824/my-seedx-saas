@@ -108,35 +108,25 @@ export function Sidebar({ currentView, onViewChange, language = 'EN', isMobile }
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
           <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 30"
+            width="22"
+            height="22"
+            viewBox="0 0 24 24"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
             style={{ flexShrink: 0 }}
           >
             <path
-              d="M12,22 Q10,14 5,6"
+              d="M4,4 L12,18 L20,4"
               stroke="var(--accent-primary)"
-              strokeWidth="2"
+              strokeWidth="2.5"
               strokeLinecap="round"
               strokeLinejoin="round"
-              strokeDasharray="0.3 0.8"
             />
             <path
-              d="M12,22 Q14,14 19,6"
+              d="M4,21 L20,21"
               stroke="var(--accent-primary)"
-              strokeWidth="2"
+              strokeWidth="2.5"
               strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeDasharray="0.3 0.8"
-            />
-            <path
-              d="M3,22 L8,21.5 L12,22 L16,21.5 L21,22"
-              stroke="var(--accent-primary)"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeDasharray="0.3 0.8"
             />
           </svg>
           <Link 
